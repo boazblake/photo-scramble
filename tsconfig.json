@@ -1,0 +1,25 @@
+{
+  "include": [
+    "src/**/*.ts",
+    "tests/*.ts"
+  ],
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "isolatedModules": false,
+    "lib": [
+      "DOM",
+      "ES2022"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "target": "es6"
+  }
+}
