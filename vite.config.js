@@ -7,13 +7,14 @@ export default defineConfig({
   plugins: [flowPlugin()],
   resolve: {
     alias: {
-      // stream: "mithril-stream",
       m: "mithril",
+      Stream: "mithril-stream",
       "@": path.resolve(__dirname, "./src"),
     },
   },
   build: { outDir: "docs" },
   server: {
+    port: 3000,
     open: true,
   },
 })
