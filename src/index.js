@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, selectHiddenBlock, restart, splitImage, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable } from './model'
+import { newModel, upload, selectHiddenBlock, newGame, splitImage, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable, moveBlock } from './model'
 
 
 
@@ -8,110 +8,41 @@ import { newModel, upload, selectHiddenBlock, restart, splitImage, isSwapBlock, 
 const Toolbar = {
   view: ({ attrs: { mdl } }) => mdl.img.src() && m('.toolbar ',
     m('. ',
-      m('button', { onclick: () => restart(mdl) }, 'Restart')
+      m('button', { onclick: () => newGame(mdl) }, 'New'),
+      m('button', {
+        onclick: () => {
+          const img = mdl.img.src()
+          newGame(mdl)
+          upload(mdl)({ target: { files: [mdl.file] } })
+        }
+      }, 'Restart')
     )
   )
 }
 
-const Block = ({ attrs: { mdl, block } }) => {
+const Block = () => {
 
   return {
     oncreate: ({ dom, attrs: { mdl, block } }) => {
+      const origBlock = mdl.originals.find(b => b.id == block.id)
       const coords = dom.getBoundingClientRect()
-      // console.log('oncreate', block)
       block.coords = coords
+      origBlock.coords = coords
       block.dom = dom
+      origBlock.dom = dom
       dom.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
       dom.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
       dom.style.backgroundPosition = `${mdl.img.coords.left - coords.left}px ${mdl.img.coords.top - coords.top}px`
       dom.style.backgroundRepeat = 'no-repeat'
     },
-    view: ({ attrs: { mdl, block, idx } }) => {
-      // const block = getBlockById(mdl, id)
+    view: ({ attrs: { mdl, block } }) => {
       return m('.block', {
         id: block.id,
-        class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock(mdl, block) ? 'grab isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
-        onclick: !mdl.state.hiddenBlock() && selectHiddenBlock(mdl, block.id),
+        class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock(mdl, block) ? 'point isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
+        onclick: mdl.state.hiddenBlock() ? moveBlock(mdl, block) : selectHiddenBlock(mdl, block.id),
         draggable: isDraggable(mdl, block),
         style: {
           border: isHistoryBlock(mdl, block) ? '1px solid orange' : ''
-        },
-        ondragstart: (event) => {
-          mdl.swap.src = { coords: block.coords, id: block.id, dom: block.dom, idx }
-          mdl.swap.dragging = true
-        },
-        ondragenter: (event) => {
-          event.preventDefault();
-          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
-          return true
-        },
-        ondragleave: (event) => {
-          event.preventDefault();
-          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
-          return true
-        },
-        ondragover: (event) => {
-          event.preventDefault();
-          event.dataTransfer.dropEffect = 'move';
-          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
-          return true
-        },
-        ondragend: (e) => {
-          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          return true
-        },
-        ondrop: (event) => {
-
-          if (!isHiddenBlock(mdl, block)) return false
-
-          event.preventDefault();
-
-
-          const idxS = mdl.swap.src.idx
-          const idxT = mdl.swap.target.idx
-          const coordS = mdl.swap.src.coords
-          const coordT = mdl.swap.target.coords
-
-          mdl.blocks[idxS].coords = coordT
-          mdl.blocks[idxT].coords = coordS
-
-          const domT = mdl.swap.target.dom
-          selectHiddenBlock(mdl, mdl.swap.src.id)({ target: mdl.swap.src.dom })
-          domT.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
-          domT.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
-          domT.style.backgroundPosition = `${mdl.img.coords.left - mdl.swap.src.coords.left}px ${mdl.img.coords.top - mdl.swap.src.coords.top}px`
-          domT.style.backgroundRepeat = 'no-repeat'
-          mdl.swap.dragging = false
-          mdl.swap.src = { idx: null, id: null, dom: null, img: null }
-          mdl.swap.target = { idx: null, id: null, dom: null, img: null }
-          return true
-        },
-        onupdate: (vnode) => {
-          if ([mdl.swap.src.id, mdl.swap.target.id].includes(block.id) && !mdl.swap.dragging) {
-            console.log(vnode)
-            vnode.dom.classList.remove("first", "last", "invert", "play");
-            vnode.dom.classList.add("last");
-            setTimeout(() => {
-              vnode.dom.classList.remove("last");
-              vnode.dom.classList.add("invert");
-              m.redraw()
-            }, 100);
-            setTimeout(() => {
-              vnode.dom.classList.remove("invert");
-              vnode.dom.classList.add("play");
-              m.redraw()
-            }, 200);
-            setTimeout(() => {
-              vnode.dom.classList.remove("play");
-              vnode.dom.classList.add("first");
-              m.redraw()
-            }, 300);
-            mdl.swap.src = { idx: null, id: null, dom: null, img: null }
-            mdl.swap.target = { idx: null, id: null, dom: null, img: null }
-          }
-          else return false
         },
       }, isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id)))
     }

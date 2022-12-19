@@ -1,21 +1,20 @@
 import Stream from 'mithril-stream'
-
+import m from 'mithril'
 const newModel = () => ({
   cell: {
     size: Stream(0),
   },
   blocks: [],
+  originals: [],
   swap: {
     isDragging: false,
-    src: { coords: null, idx: null, id: null, dom: null, img: null },
-    target: { coords: null, idx: null, id: null, dom: null, img: null },
-    swapBlockIds: Stream([]),
+    swapBlockIds: [],
     history: [],
   },
   state: {
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
-    size: Stream(0),
+    size: Stream(100),
   },
   img: {
     search: Stream(null),
@@ -27,23 +26,23 @@ const newModel = () => ({
   }
 })
 
-const restart = mdl => {
+const newGame = mdl => {
   mdl.blocks = []
   mdl.img.src(null)
   mdl.img.search(null)
-  mdl.img.width(0)
-  mdl.img.height(0)
+  mdl.img.width(500)
+  mdl.img.height(500)
   mdl.img.zIndex(0)
   mdl.img.display('intrinsic')
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
-  mdl.state.size(0)
+  mdl.state.size(100)
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
   mdl.swap.target = { coords: null, idx: null, id: null, dom: null, img: null }
-  mdl.swap.swapBlockIds = Stream([])
+  mdl.swap.swapBlockIds = []
   mdl.swap.history = []
 
   mdl.cell.size(0)
@@ -84,7 +83,6 @@ export const toBlocks = (img, idx) => {
 const getNeighbourIds = (mdl, id, target) => {
   const blockz = Array.from(target.parentNode.children)
   const hiddenBlock = blockz.find(b => b.id == id)
-  // console.log(blockz)
   hiddenBlock.style.backgroundImage = ''
   const isNeighbour = block =>
     [100, 101].includes(distanceBetweenElements(hiddenBlock, block))
@@ -106,22 +104,25 @@ export const splitImage = (mdl, image) => {
     chunkContext.drawImage(image, x, 0, chunkWidth, height, 0, 0, chunkWidth, height);
     chunks.push(chunkCanvas.toDataURL());
   }
-
-  mdl.blocks = (chunks.map(toBlocks))
+  const blocks = chunks.map(toBlocks)
+  mdl.blocks = structuredClone(blocks)
+  mdl.originals = structuredClone(blocks)
+  m.redraw()
   mdl.img.display('none')
 }
 
-const upload = mdl => ({ target: { files } }) =>
-  Promise.resolve(mdl.img.src(URL.createObjectURL(files[0])))
-
-export const selectHiddenBlock = (mdl, id) => ({ target }) => {
-  console.log(mdl, id, target)
-  mdl.swap.history.push(id)
-  mdl.state.hiddenBlock(id)
-  mdl.swap.swapBlockIds(getNeighbourIds(mdl, id, target))
+const upload = mdl => ({ target: { files } }) => {
+  mdl.file = files[0]
+  return Promise.resolve(mdl.img.src(URL.createObjectURL(mdl.file)))
 }
 
-const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds().includes(block.id)
+export const selectHiddenBlock = (mdl, id) => ({ target }) => {
+  mdl.swap.history.push(id)
+  mdl.state.hiddenBlock(id)
+  mdl.swap.swapBlockIds = getNeighbourIds(mdl, id, target)
+}
+
+const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
 const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
 const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
 const isDraggable = (mdl, block) => {
@@ -130,17 +131,25 @@ const isDraggable = (mdl, block) => {
   } else {
     return isSwapBlock(mdl, block) || isHiddenBlock(mdl, block)
   }
+}
+const moveBlock = (mdl, block) => event => {
+  if (!mdl.swap.swapBlockIds.includes(block.id)) return
+  event.preventDefault();
+  const id = mdl.state.hiddenBlock()
+  const target = mdl.blocks.find(b => b.id == id)
+  const domT = target.dom
+  const tempCoords = target.coords
+  target.coords = block.coords
+  domT.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
+  domT.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
+  domT.style.backgroundPosition = `${mdl.img.coords.left - block.coords.left}px ${mdl.img.coords.top - block.coords.top}px`
+  domT.style.backgroundRepeat = 'no-repeat'
+  mdl.swap.dragging = false
+  block.coords = tempCoords
+  selectHiddenBlock(mdl, block.id)({ target: block.dom })
+  return true
 
-  // console.log('mdl', mdl.swap.isDragging)
-  // console.log('isSwapBlock', isSwapBlock(mdl, block))
-  // console.log('isHiddenBlock', isHiddenBlock(mdl, block))
-  // return isSwapBlock(mdl, block) && !mdl.state.isDragging || isHiddenBlock(mdl, block)
+
 }
 
-const start = (mdl) => {
-
-
-
-}
-
-export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, upload, restart, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable, start }
+export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, upload, moveBlock, newGame, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable }
