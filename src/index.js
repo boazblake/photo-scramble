@@ -9,19 +9,11 @@ const Toolbar = {
   view: ({ attrs: { mdl } }) => mdl.img.src() && m('.toolbar ',
     m('. ',
       m('button', { onclick: () => newGame(mdl) }, 'New'),
-      // m('button', {
-      //   onclick: () => {
-      //     const img = mdl.img.src()
-      //     newGame(mdl)
-      //     upload(mdl)({ target: { files: [mdl.file] } })
-      //   }
-      // }, 'Restart')
     )
   )
 }
 
 const Block = () => {
-
   return {
     oncreate: ({ dom, attrs: { mdl, block } }) => {
       const origBlock = mdl.originals.find(b => b.id == block.id)
@@ -42,9 +34,11 @@ const Block = () => {
         onclick: mdl.state.hiddenBlock() ? moveBlock(mdl, block) : selectHiddenBlock(mdl, block.id),
         draggable: isDraggable(mdl, block),
         style: {
-          border: isHistoryBlock(mdl, block) ? '1px solid orange' : ''
+          border: isSwapBlock(mdl, block) ? '2px solid gold' : ''
         },
-      }, isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id)))
+      },
+        // isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id))
+      )
     }
   }
 }
@@ -75,7 +69,7 @@ const Img = {
         width: '420px',
         height: '420px',
         zIndex: mdl.img.zIndex(),
-        display: mdl.img.display()
+        opacity: mdl.img.display() ? 1 : 0.1
       }
     })
 }
@@ -87,8 +81,6 @@ const ImageSelector = {
       m('.',
         m('label', 'Upload an image...',
           m('input', { onchange: upload(mdl), type: 'file', accept: "image/gif, image/jpeg, image/png" })),
-        // m('label', '...Or enter a URL of an image',
-        //   m('input', { onkeyup: e => { e.key == 'Enter' ? mdl.img.src(mdl.img.search()) : mdl.img.search(e.target.value) }, type: 'text', accept: "url" })),
       )
     )
 }
@@ -97,14 +89,14 @@ const ImageSelector = {
 const App = mdl => {
   return {
     view: () =>
-      m('',
-        m('#app',
-          m(Toolbar, { mdl }),
-          mdl.img.src()
-            ? m('#viewer', m(Grid, { mdl }), m(Img, { mdl }),)
-            : m(ImageSelector, { mdl })
-        ),
-        m('pre', { style: { display: 'block' } }, JSON.stringify(mdl.swap.history, null, 4)),)
+      // m('',
+      m('#app',
+        m(Toolbar, { mdl }),
+        mdl.img.src()
+          ? m('#viewer', m(Grid, { mdl }), m(Img, { mdl }),)
+          : m(ImageSelector, { mdl })
+      ),
+    // m('pre', { style: { display: 'block' } }, JSON.stringify(mdl.swap.history, null, 4)),)
   }
 }
 

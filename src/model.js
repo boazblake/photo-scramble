@@ -22,7 +22,7 @@ const newModel = () => ({
     width: Stream(0),
     height: Stream(0),
     zIndex: Stream(0),
-    display: Stream('intrinsic')
+    display: Stream(true)
   }
 })
 
@@ -33,7 +33,7 @@ const newGame = mdl => {
   mdl.img.width(0)
   mdl.img.height(0)
   mdl.img.zIndex(0)
-  mdl.img.display('intrinsic')
+  mdl.img.display(true)
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
@@ -81,15 +81,16 @@ export const toBlocks = (img, idx) => {
 }
 
 const getNeighbourIds = (mdl, id, target) => {
-  const blockz = Array.from(target.parentNode.children)
-  const hiddenBlock = blockz.find(b => b.id == id)
-  hiddenBlock.style.backgroundImage = ''
-  const isNeighbour = block => {
-    console.log(distanceBetweenElements(hiddenBlock, block))
-    return [105, 106].includes(distanceBetweenElements(hiddenBlock, block))
+  const divs = Array.from(target.parentNode.children)
+  const hiddenDiv = divs.find(b => b.id == id)
+  const hiddenBlock = mdl.blocks.find(b => b.id == id)
+  hiddenDiv.style.backgroundImage = ''
+  const isNeighbour = div => {
+    console.log(distanceBetweenElements(hiddenDiv, div))
+    return (distanceBetweenElements(hiddenDiv, div)) > 100 && (distanceBetweenElements(hiddenDiv, div)) < 120
   }
 
-  return blockz.filter(isNeighbour).map(el => el.id)
+  return divs.filter(isNeighbour).map(el => el.id)
 
 }
 
@@ -110,7 +111,7 @@ export const splitImage = (mdl, image) => {
   mdl.blocks = structuredClone(blocks)
   mdl.originals = structuredClone(blocks)
   m.redraw()
-  mdl.img.display('none')
+  mdl.img.display(false)
 }
 
 const upload = mdl => ({ target: { files } }) => {
@@ -150,8 +151,6 @@ const moveBlock = (mdl, block) => event => {
   block.coords = tempCoords
   selectHiddenBlock(mdl, block.id)({ target: block.dom })
   return true
-
-
 }
 
 export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, upload, moveBlock, newGame, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable }
