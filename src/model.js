@@ -14,7 +14,7 @@ const newModel = () => ({
   state: {
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
-    size: Stream(100),
+    size: Stream(0),
   },
   img: {
     search: Stream(null),
@@ -30,14 +30,14 @@ const newGame = mdl => {
   mdl.blocks = []
   mdl.img.src(null)
   mdl.img.search(null)
-  mdl.img.width(500)
-  mdl.img.height(500)
+  mdl.img.width(0)
+  mdl.img.height(0)
   mdl.img.zIndex(0)
   mdl.img.display('intrinsic')
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
-  mdl.state.size(100)
+  mdl.state.size(0)
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
@@ -84,8 +84,10 @@ const getNeighbourIds = (mdl, id, target) => {
   const blockz = Array.from(target.parentNode.children)
   const hiddenBlock = blockz.find(b => b.id == id)
   hiddenBlock.style.backgroundImage = ''
-  const isNeighbour = block =>
-    [100, 101].includes(distanceBetweenElements(hiddenBlock, block))
+  const isNeighbour = block => {
+    console.log(distanceBetweenElements(hiddenBlock, block))
+    return [105, 106].includes(distanceBetweenElements(hiddenBlock, block))
+  }
 
   return blockz.filter(isNeighbour).map(el => el.id)
 
@@ -94,7 +96,7 @@ const getNeighbourIds = (mdl, id, target) => {
 export const splitImage = (mdl, image) => {
   const width = image.width;
   const height = image.height;
-  const chunkWidth = Math.ceil(width / 25);
+  const chunkWidth = Math.ceil(width / 16);
   const chunks = []
   for (let x = 0; x < width; x += chunkWidth) {
     const chunkCanvas = document.createElement('canvas');

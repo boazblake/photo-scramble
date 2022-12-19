@@ -68,12 +68,12 @@ const Img = {
       },
       "src": mdl.img.src(),
       style: {
-        minWidth: '500px',
-        minHeight: '500px',
-        maxWidth: '500px',
-        maxHeight: '500px',
-        width: '500px',
-        height: '500px',
+        minWidth: '420px',
+        minHeight: '420px',
+        maxWidth: '420px',
+        maxHeight: '420px',
+        width: '420px',
+        height: '420px',
         zIndex: mdl.img.zIndex(),
         display: mdl.img.display()
       }
