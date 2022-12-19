@@ -43,7 +43,7 @@
 .block {
   border: 1px solid black;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease;
+  transition: transform 1s ease;
   will-change: transform;
 }
 

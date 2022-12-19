@@ -18,7 +18,7 @@ const Block = ({ attrs: { mdl, block } }) => {
   return {
     oncreate: ({ dom, attrs: { mdl, block } }) => {
       const coords = dom.getBoundingClientRect()
-      console.log('oncreate', block)
+      // console.log('oncreate', block)
       block.coords = coords
       block.dom = dom
       dom.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
@@ -30,7 +30,7 @@ const Block = ({ attrs: { mdl, block } }) => {
       // const block = getBlockById(mdl, id)
       return m('.block', {
         id: block.id,
-        class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock ? 'grab isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
+        class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock(mdl, block) ? 'grab isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
         onclick: !mdl.state.hiddenBlock() && selectHiddenBlock(mdl, block.id),
         draggable: isDraggable(mdl, block),
         style: {
@@ -156,8 +156,8 @@ const ImageSelector = {
       m('.',
         m('label', 'Upload an image...',
           m('input', { onchange: upload(mdl), type: 'file', accept: "image/gif, image/jpeg, image/png" })),
-        m('label', '...Or enter a URL of an image',
-          m('input', { onkeyup: e => { e.key == 'Enter' ? mdl.img.src(mdl.img.search()) : mdl.img.search(e.target.value) }, type: 'text', accept: "url" })),
+        // m('label', '...Or enter a URL of an image',
+        //   m('input', { onkeyup: e => { e.key == 'Enter' ? mdl.img.src(mdl.img.search()) : mdl.img.search(e.target.value) }, type: 'text', accept: "url" })),
       )
     )
 }
