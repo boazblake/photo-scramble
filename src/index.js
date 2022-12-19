@@ -9,13 +9,13 @@ const Toolbar = {
   view: ({ attrs: { mdl } }) => mdl.img.src() && m('.toolbar ',
     m('. ',
       m('button', { onclick: () => newGame(mdl) }, 'New'),
-      m('button', {
-        onclick: () => {
-          const img = mdl.img.src()
-          newGame(mdl)
-          upload(mdl)({ target: { files: [mdl.file] } })
-        }
-      }, 'Restart')
+      // m('button', {
+      //   onclick: () => {
+      //     const img = mdl.img.src()
+      //     newGame(mdl)
+      //     upload(mdl)({ target: { files: [mdl.file] } })
+      //   }
+      // }, 'Restart')
     )
   )
 }
