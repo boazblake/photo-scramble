@@ -55,6 +55,8 @@ window.log = m => v => {
 }
 const range = (size) => [...Array(parseInt(size)).keys()]
 
+const DISTANCE_BETWEEN_CELLS = 105
+
 const distanceBetweenElements = (el1, el2) => {
   const x1 = el1.offsetTop;
   const y1 = el1.offsetLeft;
@@ -80,15 +82,11 @@ export const toBlocks = (img, idx) => {
   return ({ img, idx, id: uuid(), coords: { x1: '', x2: '', y1: '', y2: '' } })
 }
 
-const getNeighbourIds = (mdl, id, target) => {
+const getNeighbourIds = (id, target) => {
   const divs = Array.from(target.parentNode.children)
   const hiddenDiv = divs.find(b => b.id == id)
-  const hiddenBlock = mdl.blocks.find(b => b.id == id)
   hiddenDiv.style.backgroundImage = ''
-  const isNeighbour = div => {
-    console.log(distanceBetweenElements(hiddenDiv, div))
-    return (distanceBetweenElements(hiddenDiv, div)) > 100 && (distanceBetweenElements(hiddenDiv, div)) < 120
-  }
+  const isNeighbour = div => DISTANCE_BETWEEN_CELLS == distanceBetweenElements(hiddenDiv, div)
 
   return divs.filter(isNeighbour).map(el => el.id)
 

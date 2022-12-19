@@ -33,9 +33,7 @@ const Block = () => {
         class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock(mdl, block) ? 'point isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
         onclick: mdl.state.hiddenBlock() ? moveBlock(mdl, block) : selectHiddenBlock(mdl, block.id),
         draggable: isDraggable(mdl, block),
-        style: {
-          border: isSwapBlock(mdl, block) ? '2px solid gold' : ''
-        },
+        style: { border: isSwapBlock(mdl, block) ? '2px solid gold' : '' },
       },
         // isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id))
       )
