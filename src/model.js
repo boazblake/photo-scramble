@@ -136,4 +136,11 @@ const isDraggable = (mdl, block) => {
   // console.log('isHiddenBlock', isHiddenBlock(mdl, block))
   // return isSwapBlock(mdl, block) && !mdl.state.isDragging || isHiddenBlock(mdl, block)
 }
-export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, upload, restart, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable }
+
+const start = (mdl) => {
+
+
+
+}
+
+export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, upload, restart, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable, start }
