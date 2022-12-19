@@ -1,5 +1,4 @@
 import Stream from 'mithril-stream'
-import m from 'mithril'
 const newModel = () => ({
   cell: {
     size: Stream(0),
@@ -53,9 +52,8 @@ window.log = m => v => {
   console.log(m, v)
   return v
 }
-const range = (size) => [...Array(parseInt(size)).keys()]
 
-const DISTANCE_BETWEEN_CELLS = 105
+const DISTANCE_BETWEEN_CELLS = 100
 
 const distanceBetweenElements = (el1, el2) => {
   const x1 = el1.offsetTop;
@@ -67,9 +65,6 @@ const distanceBetweenElements = (el1, el2) => {
   return Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
 }
 
-
-const SIZES = [0, 3, 4, 5, 6]
-
 const uuid = () =>
   "xxxxxxxx".replace(/[xy]/g, (c) => {
     let r = (Math.random() * 16) | 0,
@@ -78,24 +73,27 @@ const uuid = () =>
   });
 
 
-export const toBlocks = (img, idx) => {
-  return ({ img, idx, id: uuid(), coords: { x1: '', x2: '', y1: '', y2: '' } })
-}
+export const toBlocks = (img, idx) =>
+  ({ img, idx, id: uuid(), coords: { x1: '', x2: '', y1: '', y2: '' } })
+
 
 const getNeighbourIds = (id, target) => {
   const divs = Array.from(target.parentNode.children)
   const hiddenDiv = divs.find(b => b.id == id)
   hiddenDiv.style.backgroundImage = ''
-  const isNeighbour = div => DISTANCE_BETWEEN_CELLS == distanceBetweenElements(hiddenDiv, div)
+  const isNeighbour = div => {
+    console.log(distanceBetweenElements(hiddenDiv, div))
+    return DISTANCE_BETWEEN_CELLS == distanceBetweenElements(hiddenDiv, div)
+  }
 
   return divs.filter(isNeighbour).map(el => el.id)
-
 }
 
-export const splitImage = (mdl, image) => {
+const splitImage = (mdl, image) => {
   const width = image.width;
   const height = image.height;
   const chunkWidth = Math.ceil(width / 16);
+  console.log(chunkWidth, width)
   const chunks = []
   for (let x = 0; x < width; x += chunkWidth) {
     const chunkCanvas = document.createElement('canvas');
@@ -108,7 +106,7 @@ export const splitImage = (mdl, image) => {
   const blocks = chunks.map(toBlocks)
   mdl.blocks = structuredClone(blocks)
   mdl.originals = structuredClone(blocks)
-  m.redraw()
+  // m.redraw()
   mdl.img.display(false)
 }
 
@@ -117,7 +115,7 @@ const upload = mdl => ({ target: { files } }) => {
   return Promise.resolve(mdl.img.src(URL.createObjectURL(mdl.file)))
 }
 
-export const selectHiddenBlock = (mdl, id) => ({ target }) => {
+const selectHiddenBlock = (mdl, id) => ({ target }) => {
   mdl.swap.history.push(id)
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
@@ -125,7 +123,7 @@ export const selectHiddenBlock = (mdl, id) => ({ target }) => {
 
 const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
 const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
-const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
+// const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
 const isDraggable = (mdl, block) => {
   if (mdl.swap.isDragging) {
     return isHiddenBlock(mdl, block)
@@ -151,4 +149,4 @@ const moveBlock = (mdl, block) => event => {
   return true
 }
 
-export { newModel, range, distanceBetweenElements, SIZES, uuid, upload, moveBlock, newGame, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable }
+export { newModel, upload, selectHiddenBlock, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock }

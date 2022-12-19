@@ -1,7 +1,11 @@
-*,
+*,html,
 *::before,
-*::after {
+*::after,*>* {
   box-sizing: border-box;
+}
+
+:root {
+  --size: 400px;
 }
 
 #app {
@@ -19,38 +23,34 @@
 
 #viewer {
   position: relative;
-  display: flex;
-  flex-flow: row;
-  align-items: flex-start;
-  justify-content: space-around;
+  max-width: var(--size);
+  width: var(--size);
+  height: var(--size);
 }
 
 #img {
   position: absolute;
-  max-width: 420px;
-  width: auto;
-  height: auto;
+  max-width: var(--size);
+  width: var(--size);
+  height: var(--size);
 }
 
 #map {
   position: absolute;
   z-index:10;
-  /* border: 1px solid blue; */
 }
 
 .grid {
   display: grid;
-  /* grid-gap: 4px; */
+  gap:1px;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  width:420px;
-  height:420px;
+  width:var(--size);
+  height:var(--size);
   will-change: transform;
 }
 
 .block {
-  /* border: 1px solid black; */
-  /* box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5); */
   transition: transform 3s ease;
   will-change: transform;
 }
@@ -58,3 +58,19 @@
 .hiddenBlock {
   opacity: 0.1;
 }
+
+.row {
+  display: flex;
+  flex-flow: row;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.col {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+
+

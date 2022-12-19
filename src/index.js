@@ -30,10 +30,16 @@ const Block = () => {
     view: ({ attrs: { mdl, block } }) => {
       return m('.block', {
         id: block.id,
-        class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock(mdl, block) ? 'point isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
+        class: isHiddenBlock(mdl, block)
+          ? 'isSwapBlock hiddenBlock'
+          : isSwapBlock(mdl, block)
+            ? 'point isSwapBlock'
+            : !mdl.state.hiddenBlock() && 'point',
         onclick: mdl.state.hiddenBlock() ? moveBlock(mdl, block) : selectHiddenBlock(mdl, block.id),
         draggable: isDraggable(mdl, block),
-        style: { border: isSwapBlock(mdl, block) ? '2px solid gold' : '' },
+        style: {
+          // boxSizing: 'border-box', border: mdl.state.hiddenBlock() ? isSwapBlock(mdl, block) ? '2px solid gold' : '' : '2px solid aqua'
+        },
       },
         // isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id))
       )
@@ -60,12 +66,12 @@ const Img = {
       },
       "src": mdl.img.src(),
       style: {
-        minWidth: '420px',
-        minHeight: '420px',
-        maxWidth: '420px',
-        maxHeight: '420px',
-        width: '420px',
-        height: '420px',
+        minWidth: 'var(--size)',
+        minHeight: 'var(--size)',
+        maxWidth: 'var(--size)',
+        maxHeight: 'var(--size)',
+        width: 'var(--size)',
+        height: 'var(--size)',
         zIndex: mdl.img.zIndex(),
         opacity: mdl.img.display() ? 1 : 0.1
       }
@@ -87,14 +93,14 @@ const ImageSelector = {
 const App = mdl => {
   return {
     view: () =>
-      // m('',
-      m('#app',
+      m('#app.col',
         m(Toolbar, { mdl }),
         mdl.img.src()
-          ? m('#viewer', m(Grid, { mdl }), m(Img, { mdl }),)
-          : m(ImageSelector, { mdl })
+          ? m('#viewer.row', m(Grid, { mdl }), m(Img, { mdl }),)
+          : m(ImageSelector, { mdl }),
+        mdl.swap.history.length ? m('pre', { style: { fontSize: '5rem' } }, mdl.swap.history.length - 1) :
+          m('pre', { style: { fontSize: '2rem' } }, 'Select a square to hide')
       ),
-    // m('pre', { style: { display: 'block' } }, JSON.stringify(mdl.swap.history, null, 4)),)
   }
 }
 
