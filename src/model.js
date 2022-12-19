@@ -120,7 +120,7 @@ const upload = mdl => ({ target: { files } }) => {
 export const selectHiddenBlock = (mdl, id) => ({ target }) => {
   mdl.swap.history.push(id)
   mdl.state.hiddenBlock(id)
-  mdl.swap.swapBlockIds = getNeighbourIds(mdl, id, target)
+  mdl.swap.swapBlockIds = getNeighbourIds(id, target)
 }
 
 const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
@@ -151,4 +151,4 @@ const moveBlock = (mdl, block) => event => {
   return true
 }
 
-export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, upload, moveBlock, newGame, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable }
+export { newModel, range, distanceBetweenElements, SIZES, uuid, upload, moveBlock, newGame, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable }

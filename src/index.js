@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, selectHiddenBlock, newGame, splitImage, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable, moveBlock } from './model'
+import { newModel, upload, selectHiddenBlock, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock } from './model'
 
 
 
