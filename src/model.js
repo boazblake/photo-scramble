@@ -11,6 +11,9 @@ const newModel = () => ({
     swapBlockIds: Stream([]),
     direction: Stream('horizontal'),
     size: Stream(0),
+    colors: [],
+    s: null,
+    t: null,
   },
   img: {
     search: Stream(null),
@@ -67,30 +70,47 @@ const uuid = () =>
   });
 
 
-const toBlocks = (width, cellSize, imgHeight) => {
-  const height = Math.floor(imgHeight / cellSize)
-  return range(width * height).map(_ => ({ id: uuid(), coords: { x1: '', x2: '', y1: '', y2: '' } }))
+export const toBlocks = (img, idx) => {
+  return ({ img, idx, id: uuid(), coords: { x1: '', x2: '', y1: '', y2: '' } })
 }
 
-const updateGame = (mdl, value) => {
-  mdl.cell.size(Math.floor(((1 / mdl.state.size()) * mdl.img.width()) - 1));
-  mdl.state.blocks(toBlocks(value, mdl.cell.size(), mdl.img.height()))
-  mdl.state.hiddenBlock(null)
-  mdl.img.display('none')
-}
+// const updateGame = (mdl, value) => {
+//   // mdl.cell.size(Math.floor(((1 / mdl.state.size()) * mdl.img.width()) - 1));
+//   mdl.state.blocks().map(toBlocks)
+//   mdl.state.hiddenBlock(null)
+//   mdl.img.display('none')
+//   m.redraw()
+// }
 
 
 const getNeighbourIds = (mdl, id, target) => {
   const blockz = Array.from(target.parentNode.children)
   const hiddenBlock = blockz.find(b => b.id == id)
+  // console.log(blockz)
   hiddenBlock.style.backgroundImage = ''
-  const isNeighbour = size => block =>
-    distanceBetweenElements(hiddenBlock, block) == size
+  const isNeighbour = block =>
+    [100, 101].includes(distanceBetweenElements(hiddenBlock, block))
 
-  return blockz.filter(isNeighbour(mdl.cell.size())).map(el => el.id)
+  return blockz.filter(isNeighbour).map(el => el.id)
 
 }
 
+export const splitImage = (mdl, image) => {
+  const width = image.width;
+  const height = image.height;
+  const chunkWidth = Math.ceil(width / 25);
+  const chunks = []
+  for (let x = 0; x < width; x += chunkWidth) {
+    const chunkCanvas = document.createElement('canvas');
+    const chunkContext = chunkCanvas.getContext('2d');
+    chunkCanvas.width = chunkWidth;
+    chunkCanvas.height = height;
+    chunkContext.drawImage(image, x, 0, chunkWidth, height, 0, 0, chunkWidth, height);
+    chunks.push(chunkCanvas.toDataURL());
+  }
+  mdl.state.blocks(chunks.map(toBlocks))
+  mdl.img.display('none')
+}
 
 const setupDrag = mdl => ({
   swap: true,
@@ -114,27 +134,20 @@ const setupDrag = mdl => ({
 })
 
 
-const upload = mdl => ({ target: { files } }) => {
-  const reader = new FileReader()
-  reader.onloadend = _ => {
-    mdl.img.src(reader.result)
-    m.redraw()
-  }
-  reader.readAsDataURL(files[0])
-}
+const upload = mdl => ({ target: { files } }) =>
+  Promise.resolve(mdl.img.src(URL.createObjectURL(files[0])))
+
+// const scramble = mdl => {
+// let xs = [mdl.img.height(), mdl.img.width()].sort((a, b) => a - b)
+// let size = Math.ceil(xs[0] / xs[1]) * 5
+// let height = range(size).filter(x => (((mdl.img.height() % x) + x) % x) == 0)
+// let width = range(size).filter(x => (((mdl.img.width() % x) + x) % x) == 0)
+// let value = (Math.max(...height) / Math.max(...width))
+// console.log('?', size, mdl.img.height(), mdl.img.width(),)
+// mdl.state.size(size);
+// mdl.state.blocks(size)
+// updateGame(mdl, size)
+// }
 
 
-const scramble = mdl => {
-  let xs = [mdl.img.height(), mdl.img.width()].sort((a, b) => a - b)
-  let size = Math.floor(xs[0] / xs[1]) * 10
-  // let height = range(size).filter(x => (((mdl.img.height() % x) + x) % x) == 0)
-  // let width = range(size).filter(x => (((mdl.img.width() % x) + x) % x) == 0)
-  // let value = (Math.max(...height) / Math.max(...width))
-  console.log(size, mdl.img.height(), mdl.img.width(),)
-  mdl.state.size(size);
-  // mdl.state.blocks(null)
-  updateGame(mdl, size)
-}
-
-
-export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, setupDrag, upload, updateGame, restart, scramble }
+export { newModel, range, distanceBetweenElements, SIZES, uuid, getNeighbourIds, setupDrag, upload, restart }

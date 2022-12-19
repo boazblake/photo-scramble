@@ -1,6 +1,6 @@
 #app {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 
 .grab {
@@ -28,4 +28,19 @@
   position: absolute;
   z-index:10;
   border: 1px solid blue;
+}
+
+.grid {
+  display: grid;
+  grid-gap: 1px;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  width:500px;
+  height:500px;
+
+}
+
+.block {
+  border: 1px solid black;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
 }
