@@ -1,7 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-// import { Sortable, Swap } from 'sortablejs';
-import { newModel, upload, getNeighbourIds, restart, splitImage } from './model'
+import { newModel, upload, selectHiddenBlock, restart, splitImage, isSwapBlock, isHiddenBlock, isHistoryBlock, isDraggable } from './model'
 
 
 
@@ -9,109 +8,121 @@ import { newModel, upload, getNeighbourIds, restart, splitImage } from './model'
 const Toolbar = {
   view: ({ attrs: { mdl } }) => mdl.img.src() && m('.toolbar ',
     m('. ',
-      // m(SizeSelector, { mdl })
-      // m('button', { onclick: () => scramble(mdl) }, 'Scramble')
-    ),
-    m('. ',
       m('button', { onclick: () => restart(mdl) }, 'Restart')
     )
   )
 }
 
-const Block = ({ attrs: { selectHiddenBlock } }) => {
+const Block = ({ attrs: { mdl, block } }) => {
+
   return {
     oncreate: ({ dom, attrs: { mdl, block } }) => {
       const coords = dom.getBoundingClientRect()
+      console.log('oncreate', block)
       block.coords = coords
+      block.dom = dom
       dom.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
       dom.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
       dom.style.backgroundPosition = `${mdl.img.coords.left - coords.left}px ${mdl.img.coords.top - coords.top}px`
       dom.style.backgroundRepeat = 'no-repeat'
     },
-    ondragstart: (event) => {
-      event.preventDefault();
-
-      console.log(event)
-      mdl.state.s = { index, color }
-      mdl.state.dragging = true
-      // Set the data that will be transferred when the element is dragged
-      event.dataTransfer.setData('color', color);
-    },
-    ondragenter: (event) => {
-      // Allow the drop event to occur
-      event.preventDefault();
-      mdl.state.t = { index, color }
-    },
-    ondragover: (event) => {
-      // Allow the drop event to occur
-      event.preventDefault();
-      mdl.state.t = { index, color }
-    },
-    ondragend: (e) => {
-      e.preventDefault();
-
-      if (mdl.state.swapBlockIds().includes(e.swapItem.id)) return false
-      const swappableBlockIds = getNeighbourIds(mdl, e.swapItem.id, e.swapItem)
-      mdl.state.swapBlockIds(swappableBlockIds)
-      m.redraw()
-    },
-    ondrop: (event) => {
-      event.preventDefault();
-
-      console.log(event)
-
-      // Retrieve the data that was set in the ondragstart event
-      const color1 = mdl.state.s.color//event.dataTransfer.getData('color');
-      // Get the index of the square being dragged
-      const index1 = mdl.state.s.index// mdl.state.blocks.indexOf(color1);
-      // Get the index of the square being dropped on
-      const index2 = mdl.state.t.index //mdl.state.blocks.indexOf(color);
-      // Check if the squares are adjacent
-      if (Math.abs(index1 - index2) === 1 || Math.abs(index1 - index2) === 5) {
-        // Swap the mdl.state.blocks of the squares using array destructuring
-        [mdl.state.blocks[index1], mdl.state.blocks[index2]] = [mdl.state.blocks[index2], mdl.state.blocks[index1]];
-      } else {
-        // Invert the mdl.state.blocks of the squares
-        mdl.state.blocks[index1] = invertColor(color1);
-        mdl.state.blocks[index2] = invertColor(color);
-      }
-      mdl.state.dragging = false
-      mdl.state.s = null
-      mdl.state.t = null
-    },
-    view: ({ attrs: { mdl, block, isHiddenBlock, idx, isSwapBlock } }) => {
-      // console.log(block, isHiddenBlock, isSwapBlock)
+    view: ({ attrs: { mdl, block, idx } }) => {
+      // const block = getBlockById(mdl, id)
       return m('.block', {
         id: block.id,
-        class: isHiddenBlock ? 'isSwapBlock' : isSwapBlock ? 'grab isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
-        onclick: !mdl.state.hiddenBlock() && selectHiddenBlock(block.id),
-        draggable: isHiddenBlock ? null : isSwapBlock,
-        // style: { width: `${mdl.cell.size()}px`, height: `${mdl.cell.size()}px` }
-      })
+        class: isHiddenBlock(mdl, block) ? 'isSwapBlock hiddenBlock' : isSwapBlock ? 'grab isSwapBlock' : !mdl.state.hiddenBlock() && 'point',
+        onclick: !mdl.state.hiddenBlock() && selectHiddenBlock(mdl, block.id),
+        draggable: isDraggable(mdl, block),
+        style: {
+          border: isHistoryBlock(mdl, block) ? '1px solid orange' : ''
+        },
+        ondragstart: (event) => {
+          mdl.swap.src = { coords: block.coords, id: block.id, dom: block.dom, idx }
+          mdl.swap.dragging = true
+        },
+        ondragenter: (event) => {
+          event.preventDefault();
+          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
+          return true
+        },
+        ondragleave: (event) => {
+          event.preventDefault();
+          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
+          return true
+        },
+        ondragover: (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
+          return true
+        },
+        ondragend: (e) => {
+          mdl.swap.target = { coords: block.coords, id: block.id, dom: block.dom, idx }
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          return true
+        },
+        ondrop: (event) => {
+
+          if (!isHiddenBlock(mdl, block)) return false
+
+          event.preventDefault();
+
+
+          const idxS = mdl.swap.src.idx
+          const idxT = mdl.swap.target.idx
+          const coordS = mdl.swap.src.coords
+          const coordT = mdl.swap.target.coords
+
+          mdl.blocks[idxS].coords = coordT
+          mdl.blocks[idxT].coords = coordS
+
+          const domT = mdl.swap.target.dom
+          selectHiddenBlock(mdl, mdl.swap.src.id)({ target: mdl.swap.src.dom })
+          domT.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
+          domT.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
+          domT.style.backgroundPosition = `${mdl.img.coords.left - mdl.swap.src.coords.left}px ${mdl.img.coords.top - mdl.swap.src.coords.top}px`
+          domT.style.backgroundRepeat = 'no-repeat'
+          mdl.swap.dragging = false
+          mdl.swap.src = { idx: null, id: null, dom: null, img: null }
+          mdl.swap.target = { idx: null, id: null, dom: null, img: null }
+          return true
+        },
+        onupdate: (vnode) => {
+          if ([mdl.swap.src.id, mdl.swap.target.id].includes(block.id) && !mdl.swap.dragging) {
+            console.log(vnode)
+            vnode.dom.classList.remove("first", "last", "invert", "play");
+            vnode.dom.classList.add("last");
+            setTimeout(() => {
+              vnode.dom.classList.remove("last");
+              vnode.dom.classList.add("invert");
+              m.redraw()
+            }, 100);
+            setTimeout(() => {
+              vnode.dom.classList.remove("invert");
+              vnode.dom.classList.add("play");
+              m.redraw()
+            }, 200);
+            setTimeout(() => {
+              vnode.dom.classList.remove("play");
+              vnode.dom.classList.add("first");
+              m.redraw()
+            }, 300);
+            mdl.swap.src = { idx: null, id: null, dom: null, img: null }
+            mdl.swap.target = { idx: null, id: null, dom: null, img: null }
+          }
+          else return false
+        },
+      }, isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id)))
     }
   }
 }
 
-const Board = ({ attrs: { mdl } }) => {
-  const selectHiddenBlock = id => ({ target }) => {
-    if (mdl.state.hiddenBlock() == id) {
-      mdl.state.hiddenBlock(null)
-      mdl.state.swapBlockIds([])
-    } else {
-      mdl.state.hiddenBlock(id)
+const Grid = ({ attrs: { mdl } }) => {
 
-      const swappableBlockIds = getNeighbourIds(mdl, id, target)
-      mdl.state.swapBlockIds(swappableBlockIds)
-    }
-  }
   return {
     view: ({ attrs: { mdl } }) =>
-      m('.grid#map',
-        { style: { width: `${mdl.img.width()}px`, height: `${mdl.img.height()}px`, } },
-        mdl.state.blocks().map((block, idx) =>
-          m(Block, { idx, mdl, block, selectHiddenBlock, isSwapBlock: mdl.state.swapBlockIds().includes(block.id), isHiddenBlock: mdl.state.hiddenBlock() == (block.id) })
-        )
-      )
+      m('.grid#map', mdl.blocks.map((block, idx) => m(Block, { idx, mdl, block })))
   }
 }
 
@@ -155,13 +166,14 @@ const ImageSelector = {
 const App = mdl => {
   return {
     view: () =>
-      m('', m('#app',
-        m(Toolbar, { mdl }),
-        mdl.img.src()
-          ? m('#viewer', m(Board, { mdl }), m(Img, { mdl }),)
-          : m(ImageSelector, { mdl })
-      ),
-        m('pre', { style: { display: 'block' } }, JSON.stringify(mdl, null, 4)),)
+      m('',
+        m('#app',
+          m(Toolbar, { mdl }),
+          mdl.img.src()
+            ? m('#viewer', m(Grid, { mdl }), m(Img, { mdl }),)
+            : m(ImageSelector, { mdl })
+        ),
+        m('pre', { style: { display: 'block' } }, JSON.stringify(mdl.swap.history, null, 4)),)
   }
 }
 

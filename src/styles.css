@@ -32,7 +32,7 @@
 
 .grid {
   display: grid;
-  grid-gap: 1px;
+  grid-gap: 3px;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
   width:500px;
@@ -43,4 +43,22 @@
 .block {
   border: 1px solid black;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
+.block.first {
+  transform: translate3d(0);
+}
+
+.block.last {
+  transform: translate3d(100%);
+}
+
+.block.invert {
+  transform: translate3d(-100%);
+}
+
+.block.play {
+  transform: translate3d(0);
 }
