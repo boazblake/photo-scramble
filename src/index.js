@@ -90,7 +90,7 @@ const App = mdl => {
       m('#app.col',
         m(Toolbar, { mdl }),
         mdl.swap.history.length
-          ? m('pre', { style: { fontSize: '5rem' } }, `Moves: ${mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract}`) :
+          ? m('pre', { style: { fontSize: '2rem' } }, `Moves: ${mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract}`) :
           mdl.img.src() && mdl.state.status() == 'select level' &&
           m('.col',
             m('code.underline', { style: { fontSize: '2rem' } }, 'Select a level'),
