@@ -15,6 +15,12 @@ const newModel = () => ({
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
     size: Stream(0),
+    levels: {
+      easy: { count: 10, subtract: 19 },
+      medium: { count: 50, subtract: 99 },
+      hard: { count: 100, subtract: 199 }
+    },
+    level: Stream(null)
   },
   img: {
     search: Stream(null),
@@ -37,7 +43,7 @@ const newGame = mdl => {
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
-  mdl.state.size(0)
+  mdl.state.level(null)
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
@@ -67,9 +73,9 @@ const distanceBetweenElements = (el1, el2) => {
 }
 
 const uuid = () =>
-  "xxxxxxxx".replace(/[xy]/g, (c) => {
+  'xxxxxxxx'.replace(/[xy]/g, (c) => {
     let r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 
@@ -104,6 +110,11 @@ const splitImage = (mdl, image) => {
   mdl.blocks = structuredClone(blocks)
   mdl.originals = structuredClone(blocks)
   mdl.img.display(false)
+}
+
+const selectLevel = (mdl, level) => {
+  mdl.state.level(level)
+  mdl.state.status('select square')
 }
 
 const upload = mdl => ({ target: { files } }) => {
@@ -150,7 +161,7 @@ const setBackground = (mdl, block, dom) => {
 
 
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
-  if (count >= 100) {
+  if (count >= mdl.state.levels[mdl.state.level()].count) {
     mdl.state.status('begin')
     return (mdl)
   } else if (count == 0) {
@@ -167,4 +178,4 @@ const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
 
 }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle }
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel }

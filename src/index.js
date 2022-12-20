@@ -1,16 +1,12 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle } from './model'
+import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel } from './model'
 
 
 
 
 const Toolbar = {
-  view: ({ attrs: { mdl } }) => mdl.img.src() && m('.toolbar ',
-    m('. ',
-      m('button', { onclick: () => newGame(mdl) }, 'New'),
-    )
-  )
+  view: ({ attrs: { mdl } }) => mdl.img.src() && m('.toolbar ', m('button.btn', { onclick: () => newGame(mdl) }, 'New'))
 }
 
 const Block = () => {
@@ -31,11 +27,14 @@ const Block = () => {
           ? 'isSwapBlock hiddenBlock'
           : isSwapBlock(mdl, block)
             ? 'point isSwapBlock'
-            : !mdl.state.hiddenBlock() && 'point',
-        onclick: mdl.state.hiddenBlock() ? () => moveBlock(mdl, block) : selectHiddenBlockAndShuffle(mdl, block, 0),
+            : mdl.state.status() == 'select square' && 'point',
+        onclick: mdl.state.hiddenBlock() ? () => moveBlock(mdl, block) : mdl.state.level() && selectHiddenBlockAndShuffle(mdl, block, 0),
         draggable: isDraggable(mdl, block),
         style: {
-          // boxSizing: 'border-box', border: mdl.state.hiddenBlock() ? isSwapBlock(mdl, block) ? '2px solid gold' : '' : '2px solid aqua'
+          border:
+            mdl.state.status() == 'select square' || isSwapBlock(mdl, block) ?
+              '2px solid var(--hilight)' : ''
+          //  ? isSwapBlock(mdl, block) ? '2px solid gold' : '' :
         },
       },
         // isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id))
@@ -53,7 +52,7 @@ const Grid = ({ attrs: { mdl } }) => {
 }
 
 const Img = {
-  view: ({ attrs: { mdl } }) => m("img#img",
+  view: ({ attrs: { mdl } }) => m('img#img',
     {
       onload: ({ target }) => {
         mdl.img.width(target.width)
@@ -61,7 +60,7 @@ const Img = {
         mdl.img.coords = target.getBoundingClientRect()
         splitImage(mdl, target)
       },
-      "src": mdl.img.src(),
+      'src': mdl.img.src(),
       style: {
         minWidth: 'var(--size)',
         minHeight: 'var(--size)',
@@ -81,7 +80,7 @@ const ImageSelector = {
     // m('section', { style: { height: '100vh' } },
     m('.',
       m('label', 'Upload an image...',
-        m('input', { onchange: upload(mdl), type: 'file', accept: "image/gif, image/jpeg, image/png" })),
+        m('input.btn', { onchange: e => upload(mdl)(e).then(() => mdl.state.status('select level')), type: 'file', accept: 'image/gif, image/jpeg, image/png' })),
     )
   // )
 }
@@ -96,8 +95,17 @@ const App = mdl => {
           ? m('#viewer.row', m(Grid, { mdl }), m(Img, { mdl }),)
           : m(ImageSelector, { mdl }),
         mdl.swap.history.length
-          ? m('pre', { style: { fontSize: '5rem' } }, mdl.swap.history.length - 199) :
-          mdl.img.src() && mdl.state.status() == 'select' && m('code', { style: { fontSize: '2rem' } }, 'Select a boring square to hide')
+          ? m('pre', { style: { fontSize: '5rem' } }, mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract) :
+          mdl.img.src() && mdl.state.status() == 'select level' &&
+          m('.col',
+            m('code.underline', { style: { fontSize: '2rem' } }, 'Select a level'),
+            m('.row',
+              m('button.btn', { onclick: () => selectLevel(mdl, 'easy') }, 'easy'),
+              m('button.btn', { onclick: () => selectLevel(mdl, 'medium') }, 'medium'),
+              m('button.btn', { onclick: () => selectLevel(mdl, 'hard') }, 'hard'),
+            )
+          ),
+        mdl.img.src() && mdl.state.status() == 'select square' && [m('button.btn', { onclick: () => { mdl.state.level(null); mdl.state.status('select level') } }, 'change level'), m('code.underline', { style: { fontSize: '2rem' } }, 'Select a boring square to hide')]
       ),
   }
 }
