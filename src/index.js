@@ -77,12 +77,10 @@ const Img = {
 
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
-    // m('section', { style: { height: '100vh' } },
-    m('.',
-      m('label', 'Upload an image...',
-        m('input.btn', { onchange: e => upload(mdl)(e).then(() => mdl.state.status('select level')), type: 'file', accept: 'image/gif, image/jpeg, image/png' })),
+    m('.col',
+      m('code.underline', { style: { fontSize: '2rem' } }, 'Upload an Image.'),
+      m('input.btn', { onchange: e => upload(mdl)(e).then(() => mdl.state.status('select level')), type: 'file', accept: 'image/gif, image/jpeg, image/png, image/*' }),
     )
-  // )
 }
 
 
@@ -91,11 +89,8 @@ const App = mdl => {
     view: () =>
       m('#app.col',
         m(Toolbar, { mdl }),
-        mdl.img.src()
-          ? m('#viewer.row', m(Grid, { mdl }), m(Img, { mdl }),)
-          : m(ImageSelector, { mdl }),
         mdl.swap.history.length
-          ? m('pre', { style: { fontSize: '5rem' } }, mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract) :
+          ? m('pre', { style: { fontSize: '5rem' } }, `Moves: ${mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract}`) :
           mdl.img.src() && mdl.state.status() == 'select level' &&
           m('.col',
             m('code.underline', { style: { fontSize: '2rem' } }, 'Select a level'),
@@ -105,7 +100,10 @@ const App = mdl => {
               m('button.btn', { onclick: () => selectLevel(mdl, 'hard') }, 'hard'),
             )
           ),
-        mdl.img.src() && mdl.state.status() == 'select square' && [m('button.btn', { onclick: () => { mdl.state.level(null); mdl.state.status('select level') } }, 'change level'), m('code.underline', { style: { fontSize: '2rem' } }, 'Select a boring square to hide')]
+        mdl.img.src() && mdl.state.status() == 'select square' && [m('button.btn', { onclick: () => { mdl.state.level(null); mdl.state.status('select level') } }, 'change level'), m('code.underline', { style: { fontSize: '2rem' } }, 'Select a boring square to hide')],
+        mdl.img.src()
+          ? m('#viewer.row', m(Grid, { mdl }), m(Img, { mdl }),)
+          : m(ImageSelector, { mdl }),
       ),
   }
 }
