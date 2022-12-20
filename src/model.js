@@ -11,6 +11,7 @@ const newModel = () => ({
     history: [],
   },
   state: {
+    status: Stream('select'),
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
     size: Stream(0),
@@ -48,12 +49,12 @@ const newGame = mdl => {
   return mdl
 }
 
-window.log = m => v => {
-  console.log(m, v)
-  return v
-}
+// window.log = m => v => {
+//   console.log(m, v)
+//   return v
+// }
 
-const DISTANCE_BETWEEN_CELLS = 100
+const DISTANCE_BETWEEN_CELLS = [100, 101]
 
 const distanceBetweenElements = (el1, el2) => {
   const x1 = el1.offsetTop;
@@ -81,10 +82,7 @@ const getNeighbourIds = (id, target) => {
   const divs = Array.from(target.parentNode.children)
   const hiddenDiv = divs.find(b => b.id == id)
   hiddenDiv.style.backgroundImage = ''
-  const isNeighbour = div => {
-    console.log(distanceBetweenElements(hiddenDiv, div))
-    return DISTANCE_BETWEEN_CELLS == distanceBetweenElements(hiddenDiv, div)
-  }
+  const isNeighbour = div => DISTANCE_BETWEEN_CELLS.includes(distanceBetweenElements(hiddenDiv, div))
 
   return divs.filter(isNeighbour).map(el => el.id)
 }
@@ -93,7 +91,6 @@ const splitImage = (mdl, image) => {
   const width = image.width;
   const height = image.height;
   const chunkWidth = Math.ceil(width / 16);
-  console.log(chunkWidth, width)
   const chunks = []
   for (let x = 0; x < width; x += chunkWidth) {
     const chunkCanvas = document.createElement('canvas');
@@ -106,7 +103,6 @@ const splitImage = (mdl, image) => {
   const blocks = chunks.map(toBlocks)
   mdl.blocks = structuredClone(blocks)
   mdl.originals = structuredClone(blocks)
-  // m.redraw()
   mdl.img.display(false)
 }
 
@@ -119,6 +115,7 @@ const selectHiddenBlock = (mdl, id) => ({ target }) => {
   mdl.swap.history.push(id)
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
+  return mdl
 }
 
 const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
@@ -131,22 +128,43 @@ const isDraggable = (mdl, block) => {
     return isSwapBlock(mdl, block) || isHiddenBlock(mdl, block)
   }
 }
-const moveBlock = (mdl, block) => event => {
+const moveBlock = (mdl, block) => {
   if (!mdl.swap.swapBlockIds.includes(block.id)) return
-  event.preventDefault();
   const id = mdl.state.hiddenBlock()
   const target = mdl.blocks.find(b => b.id == id)
-  const domT = target.dom
+  const targetDom = target.dom
   const tempCoords = target.coords
   target.coords = block.coords
-  domT.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
-  domT.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
-  domT.style.backgroundPosition = `${mdl.img.coords.left - block.coords.left}px ${mdl.img.coords.top - block.coords.top}px`
-  domT.style.backgroundRepeat = 'no-repeat'
+  setBackground(mdl, block, targetDom)
   mdl.swap.dragging = false
   block.coords = tempCoords
   selectHiddenBlock(mdl, block.id)({ target: block.dom })
-  return true
 }
 
-export { newModel, upload, selectHiddenBlock, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock }
+const setBackground = (mdl, block, dom) => {
+  dom.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
+  dom.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
+  dom.style.backgroundPosition = `${mdl.img.coords.left - block.coords.left}px ${mdl.img.coords.top - block.coords.top}px`
+  dom.style.backgroundRepeat = 'no-repeat'
+}
+
+
+const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
+  if (count >= 100) {
+    mdl.state.status('begin')
+    return (mdl)
+  } else if (count == 0) {
+    selectHiddenBlock(mdl, block.id)({ target })
+    return selectHiddenBlockAndShuffle(mdl, block, count + 1)({ target })
+  } else if (count > 0) {
+    selectHiddenBlock(mdl, block.id)({ target })
+    const uuid = mdl.swap.swapBlockIds[Math.floor(Math.random() * mdl.swap.swapBlockIds.length)]
+    const nextBlock = mdl.blocks.find(b => b.id == uuid)
+    const nextTarget = block.dom
+    moveBlock(mdl, nextBlock)
+    return selectHiddenBlockAndShuffle(mdl, nextBlock, count + 1)({ target: nextTarget })
+  }
+
+}
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle }

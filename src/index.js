@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, selectHiddenBlock, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock } from './model'
+import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle } from './model'
 
 
 
@@ -22,10 +22,7 @@ const Block = () => {
       origBlock.coords = coords
       block.dom = dom
       origBlock.dom = dom
-      dom.style.backgroundImage = `url(${JSON.stringify(mdl.img.src())})`
-      dom.style.backgroundSize = `${mdl.img.width()}px ${mdl.img.height()}px`
-      dom.style.backgroundPosition = `${mdl.img.coords.left - coords.left}px ${mdl.img.coords.top - coords.top}px`
-      dom.style.backgroundRepeat = 'no-repeat'
+      setBackground(mdl, block, dom)
     },
     view: ({ attrs: { mdl, block } }) => {
       return m('.block', {
@@ -35,7 +32,7 @@ const Block = () => {
           : isSwapBlock(mdl, block)
             ? 'point isSwapBlock'
             : !mdl.state.hiddenBlock() && 'point',
-        onclick: mdl.state.hiddenBlock() ? moveBlock(mdl, block) : selectHiddenBlock(mdl, block.id),
+        onclick: mdl.state.hiddenBlock() ? () => moveBlock(mdl, block) : selectHiddenBlockAndShuffle(mdl, block, 0),
         draggable: isDraggable(mdl, block),
         style: {
           // boxSizing: 'border-box', border: mdl.state.hiddenBlock() ? isSwapBlock(mdl, block) ? '2px solid gold' : '' : '2px solid aqua'
@@ -81,12 +78,12 @@ const Img = {
 
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
-    m('section', { style: { height: '100vh' } },
-      m('.',
-        m('label', 'Upload an image...',
-          m('input', { onchange: upload(mdl), type: 'file', accept: "image/gif, image/jpeg, image/png" })),
-      )
+    // m('section', { style: { height: '100vh' } },
+    m('.',
+      m('label', 'Upload an image...',
+        m('input', { onchange: upload(mdl), type: 'file', accept: "image/gif, image/jpeg, image/png" })),
     )
+  // )
 }
 
 
@@ -98,8 +95,9 @@ const App = mdl => {
         mdl.img.src()
           ? m('#viewer.row', m(Grid, { mdl }), m(Img, { mdl }),)
           : m(ImageSelector, { mdl }),
-        mdl.swap.history.length ? m('pre', { style: { fontSize: '5rem' } }, mdl.swap.history.length - 1) :
-          m('pre', { style: { fontSize: '2rem' } }, 'Select a square to hide')
+        mdl.swap.history.length
+          ? m('pre', { style: { fontSize: '5rem' } }, mdl.swap.history.length - 199) :
+          mdl.img.src() && mdl.state.status() == 'select' && m('code', { style: { fontSize: '2rem' } }, 'Select a boring square to hide')
       ),
   }
 }
