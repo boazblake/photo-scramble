@@ -1,4 +1,6 @@
 import Stream from 'mithril-stream'
+import confetti from 'canvas-confetti'
+
 const newModel = () => ({
   cell: {
     size: Stream(0),
@@ -16,9 +18,9 @@ const newModel = () => ({
     direction: Stream('horizontal'),
     size: Stream(0),
     levels: {
-      easy: { count: 10, subtract: 19 },
-      medium: { count: 50, subtract: 99 },
-      hard: { count: 100, subtract: 199 }
+      Easy: { count: 10, subtract: 19 },
+      Medium: { count: 50, subtract: 99 },
+      Hard: { count: 100, subtract: 199 }
     },
     level: Stream(null)
   },
@@ -81,7 +83,7 @@ const uuid = () =>
 
 
 export const toBlocks = (img, idx) =>
-  ({ img, idx, id: uuid(), coords: { x1: '', x2: '', y1: '', y2: '' } })
+  ({ img, idx, id: uuid(), coords: {} })
 
 
 const getNeighbourIds = (id, target) => {
@@ -108,7 +110,6 @@ const splitImage = (mdl, image) => {
   }
   const blocks = chunks.map(toBlocks)
   mdl.blocks = structuredClone(blocks)
-  mdl.originals = structuredClone(blocks)
   mdl.img.display(false)
 }
 
@@ -122,10 +123,24 @@ const upload = mdl => ({ target: { files } }) => {
   return Promise.resolve(mdl.img.src(URL.createObjectURL(mdl.file)))
 }
 
+
+const allCellsInCorrectLocation = mdl => {
+  const os = (JSON.parse(mdl.originals).map(b => JSON.stringify(b.coords)))
+  const bs = (mdl.blocks.map(b => JSON.stringify(b.coords)))
+  return os.map((o, idx) => o == bs[idx]).reduce((total, next) =>
+    next ? total : total + 1, 0)
+}
+
 const selectHiddenBlock = (mdl, id) => ({ target }) => {
   mdl.swap.history.push(id)
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
+  if (mdl.state.status() == 'ready' &&
+    allCellsInCorrectLocation(mdl) == 0) {
+    mdl.state.status('completed')
+    mdl.img.display(true)
+    fireworks()
+  }
   return mdl
 }
 
@@ -162,7 +177,7 @@ const setBackground = (mdl, block, dom) => {
 
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
   if (count >= mdl.state.levels[mdl.state.level()].count) {
-    mdl.state.status('begin')
+    mdl.state.status('ready')
     return (mdl)
   } else if (count == 0) {
     selectHiddenBlock(mdl, block.id)({ target })
@@ -175,7 +190,30 @@ const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
     moveBlock(mdl, nextBlock)
     return selectHiddenBlockAndShuffle(mdl, nextBlock, count + 1)({ target: nextTarget })
   }
-
 }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel }
+const fireworks = () => {
+  const duration = 15 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  const interval = setInterval(function () {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+    const particleCount = 50 * (timeLeft / duration);
+    // since particles fall down, start a bit higher than random
+    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+  }, 250);
+}
+
+const calculateMovesTaken = mdl => mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken }

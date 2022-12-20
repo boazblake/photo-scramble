@@ -35,6 +35,13 @@
   max-width: var(--size);
   width: var(--size);
   height: var(--size);
+  minWidth: var(--size);
+  minHeight: var(--size);
+  maxWidth: var(--size);
+  maxHeight: var(--size);
+  width: var(--size);
+  height: var(--size);
+  transition: opacity 2s ease;
 }
 
 #map {
@@ -75,12 +82,6 @@
   justify-content: center;
 }
 
-.underline {
-  text-decoration: underline;
-  text-decoration-color: var(--hilight);
-}
-
-
 .btn {
   display: inline-block;
   outline: none;
@@ -101,4 +102,10 @@
   text-decoration: inherit;
   transition-duration: 0s, 0.15s;
   color: #42526e;
+}
+
+.text {
+  font-size: var(--fontSize);
+  text-decoration: underline;
+  text-decoration-color: var(--hilight);
 }
