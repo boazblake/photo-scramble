@@ -27,6 +27,7 @@ const newModel = () => ({
   img: {
     search: Stream(null),
     src: Stream(null),
+    srcs: Stream(null),
     width: Stream(0),
     height: Stream(0),
     zIndex: Stream(0),
@@ -216,4 +217,44 @@ const fireworks = () => {
 
 const calculateMovesTaken = mdl => mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken }
+function saveImageToDesktop(mdl, imageSrc) {
+  const squareRects = mdl.blocks.map(b => b.coords)
+  // Create an empty canvas with the same dimensions as the grid
+  // const width = squareRects[0].width * 5;
+  // const height = squareRects[0].height * 5;
+  const canvas = document.createElement('canvas');
+  canvas.width = 420;
+  canvas.height = 420;
+  const ctx = canvas.getContext('2d');
+
+  // Load the image from the src
+  const image = new Image();
+  image.src = imageSrc;
+  image.onload = () => {
+    console.log('load')
+    // Iterate through the squareRects array and draw the correct section of the image onto the canvas
+    squareRects.map(squareRect => {
+      const x = squareRect.x - squareRect.width / 4;
+      const y = squareRect.y - squareRect.height / 4;
+
+      // Draw the correct section of the image onto the canvas
+      ctx.drawImage(image, x, y, squareRect.width, squareRect.height, x, y, squareRect.width, squareRect.height);
+    });
+
+    // Create a link that allows the user to download the image
+    const dataUrl = canvas.toDataURL();
+
+    mdl.img.srcs(dataUrl)
+    document.body.appendChild(canvas)
+    const link = document.createElement('a');
+    link.download = 'image.png';
+    link.href = dataUrl;
+    link.click();
+  };
+}
+
+
+
+
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop }

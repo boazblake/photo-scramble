@@ -1,13 +1,16 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken } from './model'
+import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop } from './model'
 
 
 
 
 const Toolbar = {
-  view: ({ attrs: { mdl } }) => mdl.img.src() &&
-    m('.toolbar ', m('button.btn', { onclick: () => newGame(mdl) }, 'New'))
+  view: ({ attrs: { mdl } }) =>
+    m('.col ',
+      m('code.text', { style: { fontSize: '5rem' } }, 'Photo Scramble'),
+      mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New')
+    )
 }
 
 const Block = () => {
@@ -108,6 +111,7 @@ const App = mdl => {
         mdl.img.src()
           ? m('#viewer.row', [mdl.state.status() !== 'completed' && m(Grid, { mdl })], m(Img, { mdl }),)
           : m(ImageSelector, { mdl }),
+        // m('button', { onclick: () => saveImageToDesktop(mdl, mdl.img.src()) }, 'download image'),
       ),
   }
 }
