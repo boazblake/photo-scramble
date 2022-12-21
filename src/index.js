@@ -81,10 +81,11 @@ const Img = {
 
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
-    m('.col',
-      m('code.text', 'Upload an Image.'),
+    m('label.col.point',
+      m('code.text', { for: 'upload' }, 'Upload an Image.'),
       m('input.btn',
         {
+          name: 'upload',
           onchange: e => upload(mdl)(e).then(() => mdl.state.status('select level')),
           type: 'file',
           accept: 'image/gif, image/jpeg, image/png, image/*'
