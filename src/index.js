@@ -8,7 +8,7 @@ import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDr
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
     m('.col ',
-      m('code.text', { style: { fontSize: '3rem' } }, 'PHOTO SCRAMBLE'),
+      m('code.text', { style: { letterSpacing: '3px', fontSize: '2rem' } }, 'PHOTO SCRAMBLE!'),
       mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New')
     )
 }

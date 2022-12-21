@@ -7,7 +7,7 @@
 
 :root {
   --size: 400px;
-  --fontSize: 1.3rem;
+  --fontSize: 2rem;
   --hilight: #1de9b6;
 }
 
@@ -113,4 +113,5 @@
   text-decoration: underline;
   text-decoration-color: var(--hilight);
   text-align:center;
+  margin:inherit;
 }

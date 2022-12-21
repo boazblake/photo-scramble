@@ -35,6 +35,11 @@ const newModel = () => ({
   }
 })
 
+const toMatrix = (arr, size) => {
+  const indices = Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => i * size);
+  return indices.map(i => arr.slice(i, i + size));
+}
+
 const newGame = mdl => {
   mdl.blocks = []
   mdl.img.src(null)
@@ -126,11 +131,13 @@ const upload = mdl => ({ target: { files } }) => {
 
 
 const allCellsInCorrectLocation = mdl => {
-  const os = (JSON.parse(mdl.originals).map(b => JSON.stringify(b.coords)))
-  const bs = (mdl.blocks.map(b => JSON.stringify(b.coords)))
-  return os.map((o, idx) => o == bs[idx]).reduce((total, next) =>
+  const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
+  const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
+  return original.map((original, idx) => original == current[idx]).reduce((total, next) =>
     next ? total : total + 1, 0)
 }
+
+
 
 const selectHiddenBlock = (mdl, id) => ({ target }) => {
   mdl.swap.history.push(id)
@@ -179,6 +186,7 @@ const setBackground = (mdl, block, dom) => {
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
   if (count >= mdl.state.levels[mdl.state.level()].count) {
     mdl.state.status('ready')
+    calculateMovesToFinish(mdl)
     return (mdl)
   } else if (count == 0) {
     selectHiddenBlock(mdl, block.id)({ target })
@@ -252,6 +260,71 @@ function saveImageToDesktop(mdl, imageSrc) {
     link.click();
   };
 }
+
+const calculateMovesToFinish = (mdl) => {
+  const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
+  const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
+  const origMatrix = toMatrix(original.map((_, idx) => idx), 4)
+  const currentMatrix = toMatrix(original.map((original) => current.indexOf(original)), 4)
+  const hiddenBlockIdx = mdl.blocks.map(b => b.id).indexOf(mdl.state.hiddenBlock())
+  console.log(origMatrix, currentMatrix, hiddenBlockIdx, minimumShifts(currentMatrix, hiddenBlockIdx))
+}
+function minimumShifts(matrix, missingIndex) {
+  // Get the dimensions of the matrix
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+
+  // Calculate the target position for the missing element
+  const targetRow = Math.floor(missingIndex / cols);
+  const targetCol = missingIndex % cols;
+
+  // Initialize variables to keep track of the number of shifts needed
+  let shiftsNorth = 0;
+  let shiftsSouth = 0;
+  let shiftsEast = 0;
+  let shiftsWest = 0;
+
+  // Calculate the number of shifts needed in each direction
+  matrix.map((row, rowIndex) => {
+    if (rowIndex < targetRow) {
+      shiftsNorth += targetRow - rowIndex;
+    } else if (rowIndex > targetRow) {
+      shiftsSouth += rowIndex - targetRow;
+    }
+  });
+
+  matrix[0].map((col, colIndex) => {
+    if (colIndex < targetCol) {
+      shiftsWest += targetCol - colIndex;
+    } else if (colIndex > targetCol) {
+      shiftsEast += colIndex - targetCol;
+    }
+  });
+
+  // Initialize a list to store the moves
+  const moves = [];
+
+  // Add the moves needed in the north-south direction
+  for (let i = 0; i < shiftsNorth; i++) {
+    moves.push("N");
+  }
+  for (let i = 0; i < shiftsSouth; i++) {
+    moves.push("S");
+  }
+
+  // Add the moves needed in the east-west direction
+  for (let i = 0; i < shiftsEast; i++) {
+    moves.push("E");
+  }
+  for (let i = 0; i < shiftsWest; i++) {
+    moves.push("W");
+  }
+
+  // Return the list of moves
+  return moves;
+}
+
+
 
 
 
