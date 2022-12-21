@@ -3,6 +3,7 @@
 *::after,*>* {
   box-sizing: border-box;
 }
+  html, body {margin: 0; height: 100%; overflow: hidden}
 
 :root {
   --size: 400px;
