@@ -112,4 +112,5 @@
   font-size: var(--fontSize);
   text-decoration: underline;
   text-decoration-color: var(--hilight);
+  text-align:center;
 }
