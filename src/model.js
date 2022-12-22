@@ -1,5 +1,6 @@
 import Stream from 'mithril-stream'
 import confetti from 'canvas-confetti'
+import { Maybe, pipe, chain } from 'crocks'
 
 const newModel = () => ({
   cell: {
@@ -63,10 +64,10 @@ const newGame = mdl => {
   return mdl
 }
 
-// window.log = m => v => {
-//   console.log(m, v)
-//   return v
-// }
+window.log = m => v => {
+  console.log(m, v)
+  return v
+}
 
 const DISTANCE_BETWEEN_CELLS = [100, 101]
 
@@ -267,13 +268,85 @@ const calculateMovesToFinish = (mdl) => {
   const origMatrix = toMatrix(original.map((_, idx) => idx), 4)
   const currentMatrix = toMatrix(original.map((original) => current.indexOf(original)), 4)
   const hiddenBlockIdx = mdl.blocks.map(b => b.id).indexOf(mdl.state.hiddenBlock())
-  console.log(origMatrix, currentMatrix, hiddenBlockIdx)
+  minSwaps(currentMatrix, hiddenBlockIdx)
+  console.log(origMatrix, currentMatrix, hiddenBlockIdx, minSwaps(currentMatrix, hiddenBlockIdx))
 }
 
 
+const minSwaps = (MATRIX, idx) => {
+  // helper function to get the value at a given index in the matrix
+  const getValueAtIndex = (matrix, index) => {
+    const row = Math.floor(index / matrix[0].length);
+    const col = index % matrix[0].length;
+    return matrix[row][col];
+  };
+  // helper function to swap two values in the matrix
+  const swapValues = (matrix, index1, index2) => {
+    const value1 = getValueAtIndex(matrix, index1);
+    const value2 = getValueAtIndex(matrix, index2);
+    const newMatrix = [...matrix];
+    newMatrix[Math.floor(index1 / matrix[0].length)][index1 % matrix[0].length] = value2;
+    newMatrix[Math.floor(index2 / matrix[0].length)][index2 % matrix[0].length] = value1;
+    return newMatrix;
+  };
+
+  // helper function to check if the matrix is sequential
+
+  const isMatrixSequential = matrix => {
+    const flatMatrix = matrix.flat();
+    return flatMatrix.every((value, index) => value === index);
+  };
 
 
+  const findMinimumSwaps = (matrix, index) => {
+    // base case: if the matrix is already sequential, return an empty list of swaps
+    if (isMatrixSequential(matrix)) {
+      return Maybe.of(matrix);
+    }
 
+    // check if the index is within the bounds of the matrix
+    if (!index || index < 0 || index >= matrix.length * matrix[0].length) {
+      return Maybe.Nothing();
+    }
+
+    // try swapping the value at the given index with its neighbors
+    const swapWithTop = index >= matrix[0].length ? swapValues(matrix, index, index - matrix[0].length) : null;
+    const swapWithRight = index % matrix[0].length < matrix[0].length - 1 ? swapValues(matrix, index, index + 1) : null;
+    const swapWithBottom = index < matrix.length * matrix[0].length - matrix[0].length ? swapValues(matrix, index, index + matrix[0].length) : null;
+    const swapWithLeft = index % matrix[0].length > 0 ? swapValues(matrix, index, index - 1) : null;
+
+    // recursively call the function with each of the modified matrices and the index of the swapped value
+    const minimumSwapsWithTop = swapWithTop ? chain(findMinimumSwaps, swapWithTop, index - matrix[0].length) : Maybe.Nothing();
+    const minimumSwapsWithRight = swapWithRight ? chain(findMinimumSwaps, swapWithRight, index + 1) : Maybe.Nothing();
+    const minimumSwapsWithBottom = swapWithBottom ? chain(findMinimumSwaps, swapWithBottom, index + matrix[0].length) : Maybe.Nothing();
+    const minimumSwapsWithLeft = swapWithLeft ? chain(findMinimumSwaps, swapWithLeft, index - 1) : Maybe.Nothing();
+
+    // return the minimum series of swaps from the recursive calls
+    return minimumSwapsWithTop.alt(
+      minimumSwapsWithRight).alt(
+        minimumSwapsWithBottom).alt(
+          minimumSwapsWithLeft
+        ).map(swaps => {
+          const from = getValueAtIndex(matrix, index);
+          const to = getValueAtIndex(swaps[0] < index ? swapWithLeft : swaps[0] > index ? swapWithRight : swapWithTop, swaps[0]);
+          return [[index, swaps[0]], ...swaps.map((swap, i) => [swaps[i], swaps[i + 1]])];
+        });
+
+  };
+
+  const formatResult = result => {
+    console.log(result)
+    return result.map(swaps => swaps.map(([from, to]) => `${from} -> ${to}`))
+  };
+
+  const findAndFormatMinimumSwaps = (MATRIX, idx) => formatResult(findMinimumSwaps(MATRIX, idx))
+
+  const result = findAndFormatMinimumSwaps(MATRIX, idx);
+
+  if (result.isJust()) {
+    console.log(result);
+  }
+}
 
 
 export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop }
