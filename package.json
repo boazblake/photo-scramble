@@ -7,8 +7,7 @@
     "canvas-confetti": "^1.6.0",
     "crocks": "^0.12.4",
     "mithril": "^2.2.2",
-    "mithril-stream": "^2.0.0",
-    "vite-plugin-pwa": "^0.14.0"
+    "mithril-stream": "^2.0.0"
   },
   "scripts": {
     "clean": "rm -rf ./dist && rm -rf ./node_modules",
