@@ -3,8 +3,6 @@ import './styles.css'
 import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop } from './model'
 
 
-
-
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
     m('.col ',

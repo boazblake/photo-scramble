@@ -40,7 +40,7 @@ export default defineConfig({
         }
       ]
     }
-    , registerType: 'auto', devOptions: { enabled: false }
+    , registerType: 'autoUpdate', devOptions: { enabled: true }
   })],
   resolve: {
     alias: {
