@@ -9,6 +9,9 @@ export default defineConfig({
   plugins: [flowPlugin(),
   VitePWA({
     registerType: 'autoUpdate',
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+    }
   })],
   resolve: {
     alias: {
