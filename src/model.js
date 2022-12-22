@@ -269,7 +269,7 @@ const calculateMovesToFinish = (mdl) => {
   const currentMatrix = toMatrix(original.map((original) => current.indexOf(original)), 4)
   const hiddenBlockIdx = mdl.blocks.map(b => b.id).indexOf(mdl.state.hiddenBlock())
   minSwaps(currentMatrix, hiddenBlockIdx)
-  console.log(origMatrix, currentMatrix, hiddenBlockIdx, minSwaps(currentMatrix, hiddenBlockIdx))
+  console.log(origMatrix, currentMatrix, hiddenBlockIdx)
 }
 
 

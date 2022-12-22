@@ -1,10 +1,13 @@
 import { defineConfig } from "vite"
 import { flowPlugin, esbuildFlowPlugin } from "@bunchtogether/vite-plugin-flow"
+import { VitePWA } from 'vite-plugin-pwa'
+
 import path from "path"
 
 export default defineConfig({
   optimizeDeps: { esbuildOptions: { plugins: [esbuildFlowPlugin()] } },
-  plugins: [flowPlugin()],
+  plugins: [flowPlugin(),
+  VitePWA({ registerType: 'autoUpdate', devOptions: { enabled: true } })],
   resolve: {
     alias: {
       m: "mithril",
