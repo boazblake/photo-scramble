@@ -6,13 +6,7 @@ import path from "path"
 
 export default defineConfig({
   optimizeDeps: { esbuildOptions: { plugins: [esbuildFlowPlugin()] } },
-  plugins: [flowPlugin(),
-  VitePWA({
-    registerType: 'autoUpdate',
-    workbox: {
-      globPatterns: ['**/*.{js,css,html,ico,png,svg}']
-    }
-  })],
+  plugins: [flowPlugin()],
   resolve: {
     alias: {
       m: "mithril",
