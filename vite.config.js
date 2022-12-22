@@ -7,7 +7,7 @@ import path from "path"
 export default defineConfig({
   optimizeDeps: { esbuildOptions: { plugins: [esbuildFlowPlugin()] } },
   plugins: [flowPlugin(),
-  VitePWA({ registerType: 'script', devOptions: { enabled: true } })],
+  VitePWA({ registerType: 'script', })],
   resolve: {
     alias: {
       m: "mithril",
