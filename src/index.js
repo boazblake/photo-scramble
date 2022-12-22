@@ -105,7 +105,7 @@ const App = mdl => {
           m('.col',
             m('code.text', 'Select a level'),
             m('.row', Object.keys(mdl.state.levels)
-              .map(level => m('button.btn', { onclick: () => selectLevel(mdl, level) }, level))
+              .map(level => m('button.btn', { style: { border: `2px solid var(--hilight)` }, onclick: () => selectLevel(mdl, level) }, level))
             )
           ),
         mdl.img.src() && mdl.state.status() == 'select square' && [m('button.btn', { onclick: () => { mdl.state.level(null); mdl.state.status('select level') } }, 'change level'), m('code.text', 'Select a boring square to hide')],
