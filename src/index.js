@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop } from './model'
+import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock } from './model'
 
 
 const Toolbar = {
@@ -41,7 +41,10 @@ const Block = () => {
               '2px solid var(--hilight)' : ''
         },
       },
-        // isHistoryBlock(mdl, block) && m('p', mdl.swap.history.indexOf(block.id))
+        isHistoryBlock(mdl, block) ? mdl.swap.history.map((id, idx) => ({ id, idx }))
+          // .map(log('?'))
+          .filter(b => b.id == block.id)
+          .map((b, idx) => m('p', { style: { position: 'absolute', top: 0, left: `${idx * 15}px`, color: 'white' } }, b.idx)) : null
       )
     }
   }

@@ -51,7 +51,7 @@ const newGame = mdl => {
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
-  mdl.state.level(null)
+  mdl.state.level('Easy')
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
@@ -140,6 +140,7 @@ const allCellsInCorrectLocation = mdl => {
 
 
 const selectHiddenBlock = (mdl, id) => ({ target }) => {
+  console.log(mdl.swap.history)
   mdl.swap.history.push(id)
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
@@ -154,7 +155,10 @@ const selectHiddenBlock = (mdl, id) => ({ target }) => {
 
 const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
 const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
-// const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
+const isHistoryBlock = (mdl, block) => {
+  // console.log(block, mdl.swap.history)
+  return mdl.swap.history.includes(block.id)
+}
 const isDraggable = (mdl, block) => {
   if (mdl.swap.isDragging) {
     return isHiddenBlock(mdl, block)
@@ -192,8 +196,15 @@ const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
     selectHiddenBlock(mdl, block.id)({ target })
     return selectHiddenBlockAndShuffle(mdl, block, count + 1)({ target })
   } else if (count > 0) {
-    selectHiddenBlock(mdl, block.id)({ target })
-    const uuid = mdl.swap.swapBlockIds[Math.floor(Math.random() * mdl.swap.swapBlockIds.length)]
+    // selectHiddenBlock(mdl, block.id)({ target })
+    const filtered = mdl.swap.swapBlockIds.filter(id => !mdl.swap.history.includes(id))
+    const uuid = filtered[Math.floor(Math.random() * filtered.length)]
+    console.log(uuid)
+    if (uuid == undefined) {
+      console.log(uuid, mdl.swap.history, mdl.swap.swapBlockIds, filtered)
+      count = mdl.state.levels[mdl.state.level()].count - 1
+      return mdl
+    }
     const nextBlock = mdl.blocks.find(b => b.id == uuid)
     const nextTarget = block.dom
     moveBlock(mdl, nextBlock)
@@ -223,7 +234,14 @@ const fireworks = () => {
   }, 250);
 }
 
-const calculateMovesTaken = mdl => mdl.swap.history.length - mdl.state.levels[mdl.state.level()].subtract
+const calculateMovesTaken = mdl => {
+  if (mdl.state.status() == 'ready') {
+    console.log()
+    return mdl.swap.history.length - mdl.swap.history.length //- mdl.state.levels[mdl.state.level()]?.subtract || 0
+
+  }
+  else return 0
+}
 
 function saveImageToDesktop(mdl, imageSrc) {
   const squareRects = mdl.blocks.map(b => b.coords)
@@ -262,15 +280,140 @@ function saveImageToDesktop(mdl, imageSrc) {
 }
 
 const calculateMovesToFinish = (mdl) => {
-  const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
-  const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
-  const origMatrix = toMatrix(original.map((_, idx) => idx), 4)
-  const currentMatrix = toMatrix(original.map((original) => current.indexOf(original)), 4)
-  const hiddenBlockIdx = mdl.blocks.map(b => b.id).indexOf(mdl.state.hiddenBlock())
-  console.log(origMatrix, currentMatrix, hiddenBlockIdx)
+  // console.log(mdl.swap.history)
+  // const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
+  // const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
+  // const origMatrix = toMatrix(original.map((_, idx) => idx), 4)
+  // const currentMatrix = toMatrix(original.map((original) => current.indexOf(original)), 4)
+  // const hiddenBlockIdx = mdl.blocks.map(b => b.id).indexOf(mdl.state.hiddenBlock())
+  // console.log(origMatrix, currentMatrix, hiddenBlockIdx )
 }
+// Define a function that takes a matrix and a target value, and returns an object with the indices of the target value in the matrix
+const getTargetIndex = (matrix, target) => {
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix[i].length; j++) {
+      if (matrix[i][j] === target) {
+        return { x: i, y: j };
+      }
+    }
+  }
+};
+
+
+// // Define a helper function that takes a matrix and returns the index of the pivot element
+// const pivot = matrix => {
+//   let pivotIndex = 0;
+//   for (let i = 1; i < matrix.length; i++) {
+//     if (matrix[i] < matrix[pivotIndex]) {
+//       pivotIndex = i;
+//     }
+//   }
+//   return pivotIndex;
+// };
+
+// // Define a helper function that takes a matrix and a pivot index, and returns the matrix with the items on either side of the pivot index sorted
+// const quickSort = (matrix, pivotIndex) => {
+//   if (matrix.length > 1) {
+//     let left = [];
+//     let right = [];
+//     for (let i = 0; i < matrix.length; i++) {
+//       if (i !== pivotIndex) {
+//         if (matrix[i] < matrix[pivotIndex]) {
+//           left.push(matrix[i]);
+//         } else {
+//           right.push(matrix[i]);
+//         }
+//       }
+//     }
+//     return quickSort(left, pivot(left)).concat(matrix[pivotIndex], quickSort(right, pivot(right)));
+//   } else {
+//     return matrix;
+//   }
+// };
+
+const sortMatrix = (matrix, index) => {
+  // Check if the index is out of bounds
+  if (index < 0 || index >= matrix.length * matrix[0].length) {
+    return { sortedMatrix: matrix, steps: [] };
+  }
+
+  // Calculate the coordinates of the target item in the matrix
+  const i = Math.floor(index / matrix[0].length);
+  const j = index % matrix[0].length;
+
+  // Get the target item at the given index
+  const target = matrix[i][j];
+
+  // Find all valid swaps for the target item
+  const validSwaps = getValidSwaps(matrix, [i, j]);
+
+  // If there are no valid swaps, return the matrix
+  if (validSwaps.length === 0) {
+    return { sortedMatrix: matrix, steps: [] };
+  }
+
+  // Choose the smallest valid swap
+  const minSwap = Math.min(...validSwaps);
+
+  // Find the index of the smallest valid swap in the matrix
+  const { x, y } = getTargetIndex(matrix, minSwap);
+
+  // Create a copy of the matrix
+  const sortedMatrix = matrix.map(row => row.slice());
+
+  // Swap the smallest valid swap with the target item in the copy of the matrix
+  sortedMatrix[i][j] = minSwap;
+  sortedMatrix[x][y] = target;
+
+  // Recursively sort the copy of the matrix using the new target item
+  const { sortedMatrix: nextMatrix, steps: nextSteps } = sortMatrix(sortedMatrix, index + 1);
+
+  return {
+    sortedMatrix: nextMatrix,
+    steps: [
+      {
+        from: [i, j],
+        to: [x, y],
+      },
+      ...nextSteps,
+    ],
+  };
+};
 
 
 
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop }
+const getValidSwaps = (matrix, [i, j]) => {
+  // Initialize an array to store the valid swaps
+  const validSwaps = [];
+
+  // Check if the top element is a valid swap
+  if (i > 0) {
+    validSwaps.push(matrix[i - 1][j]);
+  }
+
+  // Check if the bottom element is a valid swap
+  if (i < matrix.length - 1) {
+    validSwaps.push(matrix[i + 1][j]);
+  }
+
+  // Check if the left element is a valid swap
+  if (j > 0) {
+    validSwaps.push(matrix[i][j - 1]);
+  }
+
+  // Check if the right element is a valid swap
+  if (j < matrix[0].length - 1) {
+    validSwaps.push(matrix[i][j + 1]);
+  }
+
+  return validSwaps;
+};
+
+
+
+
+
+
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop, isHistoryBlock }

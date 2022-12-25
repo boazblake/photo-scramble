@@ -167,11 +167,6 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
-crocks@^0.12.4:
-  version "0.12.4"
-  resolved "https://registry.yarnpkg.com/crocks/-/crocks-0.12.4.tgz#b4a4512f64e90c42d31375e1a2902a0f9d4b4916"
-  integrity sha512-paln6xJUrR9e/OWMFsyTi4dLyr+q99C5f7PQbGgSDHtwsfW0sCNZvnpHzvniI2dAE0uoBgeIP1Ukmme8Z0HxxA==
-
 cross-spawn@^7.0.2:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
@@ -528,6 +523,11 @@ flow-remove-types@^2.158.0:
     flow-parser "^0.184.0"
     pirates "^3.0.2"
     vlq "^0.2.1"
+
+fp-ts@^2.13.1:
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.13.1.tgz#1bf2b24136cca154846af16752dc29e8fa506f2a"
+  integrity sha512-0eu5ULPS2c/jsa1lGFneEFFEdTbembJv8e4QKXeVJ3lm/5hyve06dlKZrpxmMwJt6rYen7sxmHHK2CLaXvWuWQ==
 
 fs.realpath@^1.0.0:
   version "1.0.0"
