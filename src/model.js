@@ -2,6 +2,7 @@ import Stream from 'mithril-stream'
 import confetti from 'canvas-confetti'
 
 const newModel = () => ({
+  chunks: [],
   blocks: [],
   originals: [],
   swap: {
@@ -47,6 +48,7 @@ const newGame = mdl => {
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
+  mdl.state.showHint(false)
   mdl.state.level(null)
 
   mdl.swap.isDragging = false
@@ -108,7 +110,9 @@ const splitImage = (mdl, image) => {
     chunkCanvas.width = chunkWidth;
     chunkCanvas.height = height;
     chunkContext.drawImage(image, x, 0, chunkWidth, height, 0, 0, chunkWidth, height);
+    chunkContext.clip()
     chunks.push(chunkCanvas.toDataURL());
+    mdl.chunks.push(chunkCanvas)
   }
   const blocks = chunks.map(toBlocks)
   mdl.blocks = structuredClone(blocks)
@@ -133,6 +137,7 @@ const restart = mdl => {
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
   mdl.state.level(null)
+  mdl.state.showHint(false)
   mdl.blocks = []
   mdl.originals = []
   mdl.img.display(true)
@@ -161,7 +166,6 @@ const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
 
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
-  isUser && console.log(calcStepsLeft(mdl), mdl.swap.history)
   if (mdl.state.status() == 'ready' &&
     calcStepsLeft(mdl) == 0) {
     mdl.state.status('completed')
@@ -257,41 +261,177 @@ const calculateMovesTaken = mdl => {
   return mdl.swap.history.length - mdl.state.levels[mdl.state.level()].count
 }
 
-// function saveImageToDesktop(mdl, imageSrc) {
-//   const squareRects = mdl.blocks.map(b => b.coords)
-//   // Create an empty canvas with the same dimensions as the grid
-//   // const width = squareRects[0].width * 5;
-//   // const height = squareRects[0].height * 5;
+// function saveImageToDesktop(mdl) {
+//   const canvasList = mdl.chunks
+//   const getBoundingClientRectList = mdl.blocks.map(b => b.coords)
+//   console.log(getBoundingClientRectList, canvasList)
+//   const newCanvas = document.createElement('canvas');
+//   const img = new Image()
+//   img.src = mdl.img.src()
+//   newCanvas.width = img.width
+//   newCanvas.height = img.height
+
+//   // Get the new canvas' 2D context
+//   const ctx = newCanvas.getContext('2d');
+
+//   // Iterate through the list of canvases and getBoundingClientRect objects
+//   for (let i = 0; i < canvasList.length; i++) {
+//     const canvas = canvasList[i];
+//     const rect = getBoundingClientRectList[i];
+
+//     // Draw the canvas on the new canvas
+//     ctx.drawImage(canvas, rect.left, rect.top, rect.width, rect.height);
+//   }
+
+
+//   // Retrieve the composite image as a data URL
+//   const compositeImage = newCanvas.toDataURL();
+
+//   // Create a link element
+//   const link = document.createElement('a');
+
+//   // Set the link's href to the composite image data URL
+//   link.href = compositeImage;
+
+//   // Set the download attribute to specify the desired file name
+//   link.download = 'composite-image.png';
+
+//   // Append the link to the body of the document
+//   document.body.appendChild(link);
+
+//   // Click the link to trigger the download
+//   link.click();
+
+//   // Remove the link from the document
+//   document.body.removeChild(link);
+// }
+// function saveImageToDesktop(mdl) {
+//   const canvasList = mdl.chunks
+//   const imgs = mdl.chunks.map(c => c.toDataURL())
+//   const getBoundingClientRectList = mdl.blocks.map(b => b.coords)
+//   console.log(getBoundingClientRectList, canvasList, imgs)
+//   // const newCanvas = document.createElement('canvas');
+//   const img = new Image()
+//   img.src = mdl.img.src()
+//   const targetWidth = 400
+//   const targetHeight = 400
+//   // Create an image element
+//   const image = new Image();
+
+//   // Set the image's src to the data source
+//   image.src = mdl.img.src();
+
+//   // Create a canvas element
 //   const canvas = document.createElement('canvas');
-//   canvas.width = 420;
-//   canvas.height = 420;
+
+//   // Set the canvas size to the desired target width and height
+//   canvas.width = targetWidth;
+//   canvas.height = targetHeight;
+
+//   // Get the canvas' 2D context
 //   const ctx = canvas.getContext('2d');
 
-//   // Load the image from the src
-//   const image = new Image();
-//   image.src = imageSrc;
-//   image.onload = () => {
-//     // console.log('load')
-//     // Iterate through the squareRects array and draw the correct section of the image onto the canvas
-//     squareRects.map(squareRect => {
-//       const x = squareRect.x - squareRect.width / 4;
-//       const y = squareRect.y - squareRect.height / 4;
+//   // Wait for the image to load
+//   image.addEventListener('load', () => {
+//     console.log('loaded')
+//     // Draw the image on the canvas
+//     ctx.drawImage(image, 0, 0);
 
-//       // Draw the correct section of the image onto the canvas
-//       ctx.drawImage(image, x, y, squareRect.width, squareRect.height, x, y, squareRect.width, squareRect.height);
-//     });
+//     // Iterate through the list of getBoundingClientRect objects
+//     for (let i = 0; i < getBoundingClientRectList.length; i++) {
+//       const rect = getBoundingClientRectList[i];
 
-//     // Create a link that allows the user to download the image
-//     const dataUrl = canvas.toDataURL();
+//       // Set the position and size of the image on the canvas
+//       ctx.drawImage(image, rect.left, rect.top, rect.width, rect.height);
+//       ctx.clip(new Path2D(rect))
+//     }
 
-//     mdl.img.srcs(dataUrl)
-//     document.body.appendChild(canvas)
+//     // Retrieve the composite image as a data URL
+//     const compositeImage = canvas.toDataURL();
+
+//     // Create a link element
 //     const link = document.createElement('a');
-//     link.download = 'image.png';
-//     link.href = dataUrl;
+
+//     // Set the link's href to the composite image data URL
+//     link.href = compositeImage;
+
+//     // Set the download attribute to specify the desired file name
+//     link.download = 'composite-image.png';
+
+//     // Append the link to the body of the document
+//     document.body.appendChild(link);
+
+//     // Click the link to trigger the download
 //     link.click();
-//   };
+
+//     // Remove the link from the document
+//     document.body.removeChild(link);
+//   });
 // }
+
+
+function saveImageToDesktop(mdl) {
+  const imageDataSource = mdl.img.src()
+  const targetWidth = 400
+  const targetHeight = 400
+  const getClientBoundingRectList = mdl.blocks.map(b => b.coords)
+  // Create an image element
+  const image = new Image();
+
+  // Set the image's src to the data source
+  image.src = imageDataSource;
+
+  // Create a canvas element
+  const canvas = document.createElement('canvas');
+
+  // Set the canvas size to the desired target width and height
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  // Get the canvas' 2D context
+  const ctx = canvas.getContext('2d');
+
+  // Wait for the image to load
+  image.addEventListener('load', () => {
+    // Draw the entire image on the canvas
+    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    // Calculate the size of each chunk in the grid
+    const chunkWidth = targetWidth / 4;
+    const chunkHeight = targetHeight / 4;
+
+    // Iterate through the list of getClientBoundingRect objects
+    for (let i = 0; i < getClientBoundingRectList.length; i++) {
+      const rect = getClientBoundingRectList[i];
+      console.log(rect)
+      // Set the position and size of the chunk on the canvas
+      ctx.rect(rect.left, rect.top, chunkWidth, chunkHeight);
+    }
+
+    // Clip the image to the desired shapes
+
+    // Retrieve the composite image as a data URL
+    const compositeImage = canvas.toDataURL();
+
+    // Create a link element
+    const link = document.createElement('a');
+
+    // Set the link's href to the composite image data URL
+    link.href = compositeImage;
+
+    // Set the download attribute to specify the desired file name
+    link.download = 'composite-image.png';
+
+    // Append the link to the body of the document
+    document.body.appendChild(link);
+
+    // Click the link to trigger the download
+    link.click();
+
+    // Remove the link from the document
+    document.body.removeChild(link);
+  });
+}
 
 
 const calculateMovesLeft = mdl => {
@@ -302,4 +442,4 @@ const calculateMovesLeft = mdl => {
   }
 }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock }
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, saveImageToDesktop }

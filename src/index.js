@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, isLastHistoryBlock, restart, calcStepsLeft, calculateMovesLeft } from './model'
+import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, isLastHistoryBlock, restart, calculateMovesLeft, saveImageToDesktop } from './model'
 
 
 const Toolbar = {
@@ -109,8 +109,10 @@ const App = mdl => {
       m('#app.col',
         m(Toolbar, { mdl }),
         mdl.swap.history.length
-          ? [m('pre.text', `Moves: ${mdl.state.userMoves()}`),
-          mdl.state.status() !== 'completed' && m('pre.text', `Minimum Moves Left: ${calculateMovesLeft(mdl)}`)] :
+          ? [
+            m('pre.text', `Moves: ${mdl.state.userMoves()}`),
+            m('pre.text', `Minimum Moves: ${mdl.state.levels[mdl.state.level()].count}`)
+          ] :
           mdl.img.src() && mdl.state.status() == 'select level' &&
           m('.col',
             m('code.text', 'Select a level'),
@@ -122,7 +124,7 @@ const App = mdl => {
         mdl.img.src()
           ? m('#viewer.row', [mdl.state.status() !== 'completed' && m(Grid, { mdl })], m(Img, { mdl }),)
           : m(ImageSelector, { mdl }),
-        // m('button', { onclick: () => saveImageToDesktop(mdl, mdl.img.src()) }, 'download image'),
+        // m('button', { onclick: () => saveImageToDesktop(mdl) }, 'download image'),
       ),
   }
 }
