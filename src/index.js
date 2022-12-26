@@ -1,13 +1,20 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock } from './model'
+import { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, isLastHistoryBlock, restart, calcStepsLeft, calculateMovesLeft } from './model'
 
 
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
     m('.col ',
       m('code.text', { style: { letterSpacing: '3px', fontSize: '2rem' } }, 'PHOTO SCRAMBLE!'),
-      mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New')
+      mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New'),
+      mdl.state.status() == 'ready' && m('button.btn', { onclick: () => restart(mdl) }, 'Restart'),
+      mdl.state.status() == 'ready' && m("label",
+        m('code', 'show hint'),
+        m('label.switchContainer',
+          m("input.switch", { type: 'checkbox', onchange: () => mdl.state.showHint(!mdl.state.showHint()) }),
+          m(".slider.round"),
+        ))
     )
 }
 
@@ -22,7 +29,7 @@ const Block = () => {
       origBlock.dom = dom
       setBackground(mdl, block, dom)
     },
-    view: ({ attrs: { mdl, block } }) => {
+    view: ({ attrs: { idx, mdl, block } }) => {
       return m('.block', {
         id: block.id,
         disabled: mdl.state.status() == 'completed',
@@ -32,19 +39,20 @@ const Block = () => {
             ? 'point isSwapBlock'
             : mdl.state.status() == 'select square' && 'point',
         onclick: mdl.state.hiddenBlock()
-          ? () => moveBlock(mdl, block)
+          ? () => moveBlock(mdl, block, true)
           : mdl.state.level() && mdl.state.status() !== 'completed' && selectHiddenBlockAndShuffle(mdl, block, 0),
         draggable: isDraggable(mdl, block),
         style: {
           border:
             mdl.state.status() == 'select square' || (isSwapBlock(mdl, block) && mdl.state.status() !== 'completed') ?
-              '2px solid var(--hilight)' : ''
+              isLastHistoryBlock(mdl, block) && mdl.state.showHint() ? '2px solid orange' : '2px solid var(--hilight)' : ''
         },
       },
-        isHistoryBlock(mdl, block) ? mdl.swap.history.map((id, idx) => ({ id, idx }))
-          // .map(log('?'))
-          .filter(b => b.id == block.id)
-          .map((b, idx) => m('p', { style: { position: 'absolute', top: 0, left: `${idx * 15}px`, color: 'white' } }, b.idx)) : null
+        // isLastHistoryBlock(mdl, block) ? mdl.swap.history.map((id, idx) => ({ id, idx }))
+        //   .filter(b => b.id == block.id)
+        //   .map((b, idx) =>
+        //     m('p', { style: { position: 'absolute', top: 0, left: `${idx * 15}px`, color: 'orange', backgroundColor: 'white' } }, b.idx + 1)
+        //   ) : null
       )
     }
   }
@@ -101,7 +109,8 @@ const App = mdl => {
       m('#app.col',
         m(Toolbar, { mdl }),
         mdl.swap.history.length
-          ? m('pre.text', `Moves: ${calculateMovesTaken(mdl)}`) :
+          ? [m('pre.text', `Moves: ${mdl.state.userMoves()}`),
+          mdl.state.status() !== 'completed' && m('pre.text', `Minimum Moves Left: ${calculateMovesLeft(mdl)}`)] :
           mdl.img.src() && mdl.state.status() == 'select level' &&
           m('.col',
             m('code.text', 'Select a level'),

@@ -2,30 +2,29 @@ import Stream from 'mithril-stream'
 import confetti from 'canvas-confetti'
 
 const newModel = () => ({
-  cell: {
-    size: Stream(0),
-  },
   blocks: [],
   originals: [],
   swap: {
     isDragging: false,
     swapBlockIds: [],
     history: [],
+    path: [],
   },
   state: {
+    showHint: Stream(false),
+    userMoves: Stream(0),
     status: Stream('select'),
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
     size: Stream(0),
     levels: {
-      Easy: { count: 10, subtract: 19 },
+      Easy: { count: 25, subtract: 19 },
       Medium: { count: 50, subtract: 99 },
       Hard: { count: 100, subtract: 199 }
     },
     level: Stream(null)
   },
   img: {
-    search: Stream(null),
     src: Stream(null),
     srcs: Stream(null),
     width: Stream(0),
@@ -35,15 +34,12 @@ const newModel = () => ({
   }
 })
 
-const toMatrix = (arr, size) => {
-  const indices = Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => i * size);
-  return indices.map(i => arr.slice(i, i + size));
-}
+
+const getRandom = xs => xs[Math.floor(Math.random() * xs.length)]
 
 const newGame = mdl => {
   mdl.blocks = []
   mdl.img.src(null)
-  mdl.img.search(null)
   mdl.img.width(0)
   mdl.img.height(0)
   mdl.img.zIndex(0)
@@ -51,15 +47,15 @@ const newGame = mdl => {
 
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
-  mdl.state.level('Easy')
+  mdl.state.level(null)
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
   mdl.swap.target = { coords: null, idx: null, id: null, dom: null, img: null }
   mdl.swap.swapBlockIds = []
   mdl.swap.history = []
+  mdl.swap.path = []
 
-  mdl.cell.size(0)
   return mdl
 }
 
@@ -129,8 +125,23 @@ const upload = mdl => ({ target: { files } }) => {
   return Promise.resolve(mdl.img.src(URL.createObjectURL(mdl.file)))
 }
 
+const restart = mdl => {
+  mdl.swap.history = []
+  mdl.swap.path = []
+  mdl.swap.swapBlockIds = []
+  mdl.swap.history = []
+  mdl.state.hiddenBlock(null)
+  mdl.state.direction('horizontal')
+  mdl.state.level(null)
+  mdl.blocks = []
+  mdl.originals = []
+  mdl.img.display(true)
 
-const allCellsInCorrectLocation = mdl => {
+  upload(mdl)({ target: { files: [mdl.file] } }).then(() => mdl.state.status('select level'))
+}
+
+
+const calcStepsLeft = mdl => {
   const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
   const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
   return original.map((original, idx) => original == current[idx]).reduce((total, next) =>
@@ -139,13 +150,20 @@ const allCellsInCorrectLocation = mdl => {
 
 
 
-const selectHiddenBlock = (mdl, id) => ({ target }) => {
-  console.log(mdl.swap.history)
-  mdl.swap.history.push(id)
+const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
+  if (isUser && mdl.swap.history.slice(-2)[0] == id) {
+    mdl.swap.history.pop()
+  } else {
+    mdl.swap.history.push(id)
+  }
+
+  isUser && mdl.state.userMoves(mdl.state.userMoves() + 1)
+
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
+  isUser && console.log(calcStepsLeft(mdl), mdl.swap.history)
   if (mdl.state.status() == 'ready' &&
-    allCellsInCorrectLocation(mdl) == 0) {
+    calcStepsLeft(mdl) == 0) {
     mdl.state.status('completed')
     mdl.img.display(true)
     fireworks()
@@ -156,9 +174,11 @@ const selectHiddenBlock = (mdl, id) => ({ target }) => {
 const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
 const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
 const isHistoryBlock = (mdl, block) => {
-  // console.log(block, mdl.swap.history)
   return mdl.swap.history.includes(block.id)
 }
+const isLastHistoryBlock = (mdl, block) =>
+  mdl.swap.history.slice(-2)[0] == block.id
+
 const isDraggable = (mdl, block) => {
   if (mdl.swap.isDragging) {
     return isHiddenBlock(mdl, block)
@@ -166,7 +186,7 @@ const isDraggable = (mdl, block) => {
     return isSwapBlock(mdl, block) || isHiddenBlock(mdl, block)
   }
 }
-const moveBlock = (mdl, block) => {
+const moveBlock = (mdl, block, isUser) => {
   if (!mdl.swap.swapBlockIds.includes(block.id)) return
   const id = mdl.state.hiddenBlock()
   const target = mdl.blocks.find(b => b.id == id)
@@ -176,7 +196,7 @@ const moveBlock = (mdl, block) => {
   setBackground(mdl, block, targetDom)
   mdl.swap.dragging = false
   block.coords = tempCoords
-  selectHiddenBlock(mdl, block.id)({ target: block.dom })
+  selectHiddenBlock(mdl, block.id, isUser)({ target: block.dom })
 }
 
 const setBackground = (mdl, block, dom) => {
@@ -188,24 +208,22 @@ const setBackground = (mdl, block, dom) => {
 
 
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
-  if (count >= mdl.state.levels[mdl.state.level()].count) {
+  if (count == mdl.state.levels[mdl.state.level()].count) {
     mdl.state.status('ready')
-    calculateMovesToFinish(mdl)
+    mdl.swap.path = [...mdl.swap.history]
     return (mdl)
   } else if (count == 0) {
     selectHiddenBlock(mdl, block.id)({ target })
     return selectHiddenBlockAndShuffle(mdl, block, count + 1)({ target })
   } else if (count > 0) {
-    // selectHiddenBlock(mdl, block.id)({ target })
-    const filtered = mdl.swap.swapBlockIds.filter(id => !mdl.swap.history.includes(id))
-    const uuid = filtered[Math.floor(Math.random() * filtered.length)]
-    console.log(uuid)
-    if (uuid == undefined) {
-      console.log(uuid, mdl.swap.history, mdl.swap.swapBlockIds, filtered)
-      count = mdl.state.levels[mdl.state.level()].count - 1
-      return mdl
+    const lastId = mdl.swap.history.slice(-2)[0]
+    let filtered = mdl.swap.swapBlockIds.filter(id => id !== lastId)
+    const randomUuid = getRandom(filtered)
+    if (randomUuid == undefined) {
+      count = mdl.state.levels[mdl.state.level()].count
+      return selectHiddenBlockAndShuffle(mdl, block, count)({ target: block.dom })
     }
-    const nextBlock = mdl.blocks.find(b => b.id == uuid)
+    const nextBlock = mdl.blocks.find(b => b.id == randomUuid)
     const nextTarget = block.dom
     moveBlock(mdl, nextBlock)
     return selectHiddenBlockAndShuffle(mdl, nextBlock, count + 1)({ target: nextTarget })
@@ -235,185 +253,53 @@ const fireworks = () => {
 }
 
 const calculateMovesTaken = mdl => {
-  if (mdl.state.status() == 'ready') {
-    console.log()
-    return mdl.swap.history.length - mdl.swap.history.length //- mdl.state.levels[mdl.state.level()]?.subtract || 0
 
-  }
-  else return 0
+  return mdl.swap.history.length - mdl.state.levels[mdl.state.level()].count
 }
 
-function saveImageToDesktop(mdl, imageSrc) {
-  const squareRects = mdl.blocks.map(b => b.coords)
-  // Create an empty canvas with the same dimensions as the grid
-  // const width = squareRects[0].width * 5;
-  // const height = squareRects[0].height * 5;
-  const canvas = document.createElement('canvas');
-  canvas.width = 420;
-  canvas.height = 420;
-  const ctx = canvas.getContext('2d');
+// function saveImageToDesktop(mdl, imageSrc) {
+//   const squareRects = mdl.blocks.map(b => b.coords)
+//   // Create an empty canvas with the same dimensions as the grid
+//   // const width = squareRects[0].width * 5;
+//   // const height = squareRects[0].height * 5;
+//   const canvas = document.createElement('canvas');
+//   canvas.width = 420;
+//   canvas.height = 420;
+//   const ctx = canvas.getContext('2d');
 
-  // Load the image from the src
-  const image = new Image();
-  image.src = imageSrc;
-  image.onload = () => {
-    console.log('load')
-    // Iterate through the squareRects array and draw the correct section of the image onto the canvas
-    squareRects.map(squareRect => {
-      const x = squareRect.x - squareRect.width / 4;
-      const y = squareRect.y - squareRect.height / 4;
+//   // Load the image from the src
+//   const image = new Image();
+//   image.src = imageSrc;
+//   image.onload = () => {
+//     // console.log('load')
+//     // Iterate through the squareRects array and draw the correct section of the image onto the canvas
+//     squareRects.map(squareRect => {
+//       const x = squareRect.x - squareRect.width / 4;
+//       const y = squareRect.y - squareRect.height / 4;
 
-      // Draw the correct section of the image onto the canvas
-      ctx.drawImage(image, x, y, squareRect.width, squareRect.height, x, y, squareRect.width, squareRect.height);
-    });
+//       // Draw the correct section of the image onto the canvas
+//       ctx.drawImage(image, x, y, squareRect.width, squareRect.height, x, y, squareRect.width, squareRect.height);
+//     });
 
-    // Create a link that allows the user to download the image
-    const dataUrl = canvas.toDataURL();
+//     // Create a link that allows the user to download the image
+//     const dataUrl = canvas.toDataURL();
 
-    mdl.img.srcs(dataUrl)
-    document.body.appendChild(canvas)
-    const link = document.createElement('a');
-    link.download = 'image.png';
-    link.href = dataUrl;
-    link.click();
-  };
+//     mdl.img.srcs(dataUrl)
+//     document.body.appendChild(canvas)
+//     const link = document.createElement('a');
+//     link.download = 'image.png';
+//     link.href = dataUrl;
+//     link.click();
+//   };
+// }
+
+
+const calculateMovesLeft = mdl => {
+  if (mdl.swap.history.slice(-2)[0] == mdl.state.hiddenBlock()) {
+    return mdl.state.levels[mdl.state.level()].count - calculateMovesTaken(mdl)
+  } else {
+    return mdl.state.levels[mdl.state.level()].count + calculateMovesTaken(mdl)
+  }
 }
 
-const calculateMovesToFinish = (mdl) => {
-  // console.log(mdl.swap.history)
-  // const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
-  // const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
-  // const origMatrix = toMatrix(original.map((_, idx) => idx), 4)
-  // const currentMatrix = toMatrix(original.map((original) => current.indexOf(original)), 4)
-  // const hiddenBlockIdx = mdl.blocks.map(b => b.id).indexOf(mdl.state.hiddenBlock())
-  // console.log(origMatrix, currentMatrix, hiddenBlockIdx )
-}
-// Define a function that takes a matrix and a target value, and returns an object with the indices of the target value in the matrix
-const getTargetIndex = (matrix, target) => {
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < matrix[i].length; j++) {
-      if (matrix[i][j] === target) {
-        return { x: i, y: j };
-      }
-    }
-  }
-};
-
-
-// // Define a helper function that takes a matrix and returns the index of the pivot element
-// const pivot = matrix => {
-//   let pivotIndex = 0;
-//   for (let i = 1; i < matrix.length; i++) {
-//     if (matrix[i] < matrix[pivotIndex]) {
-//       pivotIndex = i;
-//     }
-//   }
-//   return pivotIndex;
-// };
-
-// // Define a helper function that takes a matrix and a pivot index, and returns the matrix with the items on either side of the pivot index sorted
-// const quickSort = (matrix, pivotIndex) => {
-//   if (matrix.length > 1) {
-//     let left = [];
-//     let right = [];
-//     for (let i = 0; i < matrix.length; i++) {
-//       if (i !== pivotIndex) {
-//         if (matrix[i] < matrix[pivotIndex]) {
-//           left.push(matrix[i]);
-//         } else {
-//           right.push(matrix[i]);
-//         }
-//       }
-//     }
-//     return quickSort(left, pivot(left)).concat(matrix[pivotIndex], quickSort(right, pivot(right)));
-//   } else {
-//     return matrix;
-//   }
-// };
-
-const sortMatrix = (matrix, index) => {
-  // Check if the index is out of bounds
-  if (index < 0 || index >= matrix.length * matrix[0].length) {
-    return { sortedMatrix: matrix, steps: [] };
-  }
-
-  // Calculate the coordinates of the target item in the matrix
-  const i = Math.floor(index / matrix[0].length);
-  const j = index % matrix[0].length;
-
-  // Get the target item at the given index
-  const target = matrix[i][j];
-
-  // Find all valid swaps for the target item
-  const validSwaps = getValidSwaps(matrix, [i, j]);
-
-  // If there are no valid swaps, return the matrix
-  if (validSwaps.length === 0) {
-    return { sortedMatrix: matrix, steps: [] };
-  }
-
-  // Choose the smallest valid swap
-  const minSwap = Math.min(...validSwaps);
-
-  // Find the index of the smallest valid swap in the matrix
-  const { x, y } = getTargetIndex(matrix, minSwap);
-
-  // Create a copy of the matrix
-  const sortedMatrix = matrix.map(row => row.slice());
-
-  // Swap the smallest valid swap with the target item in the copy of the matrix
-  sortedMatrix[i][j] = minSwap;
-  sortedMatrix[x][y] = target;
-
-  // Recursively sort the copy of the matrix using the new target item
-  const { sortedMatrix: nextMatrix, steps: nextSteps } = sortMatrix(sortedMatrix, index + 1);
-
-  return {
-    sortedMatrix: nextMatrix,
-    steps: [
-      {
-        from: [i, j],
-        to: [x, y],
-      },
-      ...nextSteps,
-    ],
-  };
-};
-
-
-
-
-const getValidSwaps = (matrix, [i, j]) => {
-  // Initialize an array to store the valid swaps
-  const validSwaps = [];
-
-  // Check if the top element is a valid swap
-  if (i > 0) {
-    validSwaps.push(matrix[i - 1][j]);
-  }
-
-  // Check if the bottom element is a valid swap
-  if (i < matrix.length - 1) {
-    validSwaps.push(matrix[i + 1][j]);
-  }
-
-  // Check if the left element is a valid swap
-  if (j > 0) {
-    validSwaps.push(matrix[i][j - 1]);
-  }
-
-  // Check if the right element is a valid swap
-  if (j < matrix[0].length - 1) {
-    validSwaps.push(matrix[i][j + 1]);
-  }
-
-  return validSwaps;
-};
-
-
-
-
-
-
-
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, saveImageToDesktop, isHistoryBlock }
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock }
