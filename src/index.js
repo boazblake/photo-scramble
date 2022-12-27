@@ -1,6 +1,8 @@
 import m from 'mithril'
 import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getClass, getAction } from './model'
+import Loader from './loader/loader.png'
+
 
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
@@ -10,7 +12,7 @@ const Toolbar = {
       mdl.state.status() == 'ready' && m("label.row",
         m('code', 'show hint'),
         m('label.switchContainer',
-          m("input.switch", { type: 'checkbox', onchange: () => mdl.state.showHint(!mdl.state.showHint()) }),
+          m("input.switch", { type: 'checkbox', oncheck: () => mdl.state.showHint(!mdl.state.showHint()) }),
           m(".slider.round"),
         ))
     )
@@ -122,7 +124,9 @@ const App = mdl => {
             , m(Img, { mdl }))
         ]
 
-          : m(ImageSelector, { mdl })
+          : [
+            m('img', { src: Loader }),
+            m(ImageSelector, { mdl })]
 
       )
   }
