@@ -164,7 +164,11 @@ const isDraggable = (mdl, block) => {
 }
 const moveBlock = (mdl, block, isUser) => {
   if (!mdl.swap.swapBlockIds.includes(block.id)) return
-  mdl.state.showHint(false)
+  let checkbox = document.getElementById('hint')
+  if (checkbox) {
+    checkbox.checked = false
+    mdl.state.showHint(false)
+  }
   const id = mdl.state.hiddenBlock()
   const target = mdl.blocks.find(b => b.id == id)
   const targetDom = target.dom

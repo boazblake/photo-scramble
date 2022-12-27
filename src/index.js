@@ -1,7 +1,7 @@
 import m from 'mithril'
 import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getClass, getAction } from './model'
-import Loader from './loader/loader.gif'
+import Loader from './files/loader.gif'
 
 
 const Toolbar = {
@@ -12,7 +12,7 @@ const Toolbar = {
       mdl.state.status() == 'ready' && m("label.row",
         m('code', 'show hint'),
         m('label.switchContainer',
-          m("input.switch", { type: 'checkbox', oncheck: () => mdl.state.showHint(!mdl.state.showHint()) }),
+          m("input.switch#hint", { type: 'checkbox', onclick: () => mdl.state.showHint(!mdl.state.showHint()) }),
           m(".slider.round"),
         ))
     )
