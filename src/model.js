@@ -1,5 +1,5 @@
 import Stream from 'mithril-stream'
-import confetti from 'canvas-confetti'
+import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
 
 const newModel = () => ({
   chunks: [],
@@ -14,7 +14,7 @@ const newModel = () => ({
   state: {
     showHint: Stream(false),
     userMoves: Stream(0),
-    status: Stream('select'),
+    status: Stream('select image'),
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
     size: Stream(0),
@@ -35,8 +35,8 @@ const newModel = () => ({
   }
 })
 
+const DISTANCE_BETWEEN_CELLS = [100, 101]
 
-const getRandom = xs => xs[Math.floor(Math.random() * xs.length)]
 
 const newGame = mdl => {
   mdl.blocks = []
@@ -50,6 +50,8 @@ const newGame = mdl => {
   mdl.state.direction('horizontal')
   mdl.state.showHint(false)
   mdl.state.level(null)
+  mdl.state.userMoves(0)
+  mdl.state.status('select image')
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
@@ -61,34 +63,8 @@ const newGame = mdl => {
   return mdl
 }
 
-window.log = m => v => {
-  console.log(m, v)
-  return v
-}
-
-const DISTANCE_BETWEEN_CELLS = [100, 101]
-
-const distanceBetweenElements = (el1, el2) => {
-  const x1 = el1.offsetTop;
-  const y1 = el1.offsetLeft;
-  const x2 = el2.offsetTop;
-  const y2 = el2.offsetLeft;
-  const xDistance = x1 - x2;
-  const yDistance = y1 - y2;
-  return Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
-}
-
-const uuid = () =>
-  'xxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = (Math.random() * 16) | 0,
-      v = c == 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-
-
-export const toBlocks = (img, idx) =>
+const toBlocks = (img, idx) =>
   ({ img, idx, id: uuid(), coords: {} })
-
 
 const getNeighbourIds = (id, target) => {
   const divs = Array.from(target.parentNode.children)
@@ -138,6 +114,7 @@ const restart = mdl => {
   mdl.state.direction('horizontal')
   mdl.state.level(null)
   mdl.state.showHint(false)
+  mdl.state.userMoves(0)
   mdl.blocks = []
   mdl.originals = []
   mdl.img.display(true)
@@ -152,8 +129,6 @@ const calcStepsLeft = mdl => {
   return original.map((original, idx) => original == current[idx]).reduce((total, next) =>
     next ? total : total + 1, 0)
 }
-
-
 
 const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
   if (isUser && mdl.swap.history.slice(-2)[0] == id) {
@@ -177,11 +152,8 @@ const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
 
 const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
 const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
-const isHistoryBlock = (mdl, block) => {
-  return mdl.swap.history.includes(block.id)
-}
-const isLastHistoryBlock = (mdl, block) =>
-  mdl.swap.history.slice(-2)[0] == block.id
+const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
+const isLastHistoryBlock = (mdl, block) => mdl.swap.history.slice(-2)[0] == block.id
 
 const isDraggable = (mdl, block) => {
   if (mdl.swap.isDragging) {
@@ -210,7 +182,6 @@ const setBackground = (mdl, block, dom) => {
   dom.style.backgroundRepeat = 'no-repeat'
 }
 
-
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
   if (count == mdl.state.levels[mdl.state.level()].count) {
     mdl.state.status('ready')
@@ -234,204 +205,7 @@ const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
   }
 }
 
-const fireworks = () => {
-  const duration = 15 * 1000;
-  const animationEnd = Date.now() + duration;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-  function randomInRange(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  const interval = setInterval(function () {
-    const timeLeft = animationEnd - Date.now();
-
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
-    const particleCount = 50 * (timeLeft / duration);
-    // since particles fall down, start a bit higher than random
-    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-  }, 250);
-}
-
-const calculateMovesTaken = mdl => {
-
-  return mdl.swap.history.length - mdl.state.levels[mdl.state.level()].count
-}
-
-// function saveImageToDesktop(mdl) {
-//   const canvasList = mdl.chunks
-//   const getBoundingClientRectList = mdl.blocks.map(b => b.coords)
-//   console.log(getBoundingClientRectList, canvasList)
-//   const newCanvas = document.createElement('canvas');
-//   const img = new Image()
-//   img.src = mdl.img.src()
-//   newCanvas.width = img.width
-//   newCanvas.height = img.height
-
-//   // Get the new canvas' 2D context
-//   const ctx = newCanvas.getContext('2d');
-
-//   // Iterate through the list of canvases and getBoundingClientRect objects
-//   for (let i = 0; i < canvasList.length; i++) {
-//     const canvas = canvasList[i];
-//     const rect = getBoundingClientRectList[i];
-
-//     // Draw the canvas on the new canvas
-//     ctx.drawImage(canvas, rect.left, rect.top, rect.width, rect.height);
-//   }
-
-
-//   // Retrieve the composite image as a data URL
-//   const compositeImage = newCanvas.toDataURL();
-
-//   // Create a link element
-//   const link = document.createElement('a');
-
-//   // Set the link's href to the composite image data URL
-//   link.href = compositeImage;
-
-//   // Set the download attribute to specify the desired file name
-//   link.download = 'composite-image.png';
-
-//   // Append the link to the body of the document
-//   document.body.appendChild(link);
-
-//   // Click the link to trigger the download
-//   link.click();
-
-//   // Remove the link from the document
-//   document.body.removeChild(link);
-// }
-// function saveImageToDesktop(mdl) {
-//   const canvasList = mdl.chunks
-//   const imgs = mdl.chunks.map(c => c.toDataURL())
-//   const getBoundingClientRectList = mdl.blocks.map(b => b.coords)
-//   console.log(getBoundingClientRectList, canvasList, imgs)
-//   // const newCanvas = document.createElement('canvas');
-//   const img = new Image()
-//   img.src = mdl.img.src()
-//   const targetWidth = 400
-//   const targetHeight = 400
-//   // Create an image element
-//   const image = new Image();
-
-//   // Set the image's src to the data source
-//   image.src = mdl.img.src();
-
-//   // Create a canvas element
-//   const canvas = document.createElement('canvas');
-
-//   // Set the canvas size to the desired target width and height
-//   canvas.width = targetWidth;
-//   canvas.height = targetHeight;
-
-//   // Get the canvas' 2D context
-//   const ctx = canvas.getContext('2d');
-
-//   // Wait for the image to load
-//   image.addEventListener('load', () => {
-//     console.log('loaded')
-//     // Draw the image on the canvas
-//     ctx.drawImage(image, 0, 0);
-
-//     // Iterate through the list of getBoundingClientRect objects
-//     for (let i = 0; i < getBoundingClientRectList.length; i++) {
-//       const rect = getBoundingClientRectList[i];
-
-//       // Set the position and size of the image on the canvas
-//       ctx.drawImage(image, rect.left, rect.top, rect.width, rect.height);
-//       ctx.clip(new Path2D(rect))
-//     }
-
-//     // Retrieve the composite image as a data URL
-//     const compositeImage = canvas.toDataURL();
-
-//     // Create a link element
-//     const link = document.createElement('a');
-
-//     // Set the link's href to the composite image data URL
-//     link.href = compositeImage;
-
-//     // Set the download attribute to specify the desired file name
-//     link.download = 'composite-image.png';
-
-//     // Append the link to the body of the document
-//     document.body.appendChild(link);
-
-//     // Click the link to trigger the download
-//     link.click();
-
-//     // Remove the link from the document
-//     document.body.removeChild(link);
-//   });
-// }
-
-
-function saveImageToDesktop(mdl) {
-  const imageDataSource = mdl.img.src()
-  const targetWidth = 400
-  const targetHeight = 400
-  const getClientBoundingRectList = mdl.blocks.map(b => b.coords)
-  // Create an image element
-  const image = new Image();
-
-  // Set the image's src to the data source
-  image.src = imageDataSource;
-
-  // Create a canvas element
-  const canvas = document.createElement('canvas');
-
-  // Set the canvas size to the desired target width and height
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-
-  // Get the canvas' 2D context
-  const ctx = canvas.getContext('2d');
-
-  // Wait for the image to load
-  image.addEventListener('load', () => {
-    // Draw the entire image on the canvas
-    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
-
-    // Calculate the size of each chunk in the grid
-    const chunkWidth = targetWidth / 4;
-    const chunkHeight = targetHeight / 4;
-
-    // Iterate through the list of getClientBoundingRect objects
-    for (let i = 0; i < getClientBoundingRectList.length; i++) {
-      const rect = getClientBoundingRectList[i];
-      console.log(rect)
-      // Set the position and size of the chunk on the canvas
-      ctx.rect(rect.left, rect.top, chunkWidth, chunkHeight);
-    }
-
-    // Clip the image to the desired shapes
-
-    // Retrieve the composite image as a data URL
-    const compositeImage = canvas.toDataURL();
-
-    // Create a link element
-    const link = document.createElement('a');
-
-    // Set the link's href to the composite image data URL
-    link.href = compositeImage;
-
-    // Set the download attribute to specify the desired file name
-    link.download = 'composite-image.png';
-
-    // Append the link to the body of the document
-    document.body.appendChild(link);
-
-    // Click the link to trigger the download
-    link.click();
-
-    // Remove the link from the document
-    document.body.removeChild(link);
-  });
-}
+const calculateMovesTaken = mdl => mdl.swap.history.length - mdl.state.levels[mdl.state.level()].count
 
 
 const calculateMovesLeft = mdl => {
@@ -442,4 +216,24 @@ const calculateMovesLeft = mdl => {
   }
 }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, saveImageToDesktop }
+const getBorder = (mdl, block) =>
+  mdl.state.status() == 'select square' || (isSwapBlock(mdl, block) && mdl.state.status() !== 'completed')
+    ? isLastHistoryBlock(mdl, block) && mdl.state.showHint()
+      ? '3px solid var(--hint)'
+      : '3px solid var(--hilight)'
+    : ''
+
+const getClass = (mdl, block) => isHiddenBlock(mdl, block)
+  ? 'isSwapBlock'
+  : isSwapBlock(mdl, block)
+    ? 'point isSwapBlock'
+    : mdl.state.status() == 'select square' && 'point'
+
+const getAction = (mdl, block) => mdl.state.hiddenBlock()
+  ? () => moveBlock(mdl, block, true)
+  : mdl.state.level() && mdl.state.status() !== 'completed' && selectHiddenBlockAndShuffle(mdl, block, 0)
+
+
+
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getClass, getAction }

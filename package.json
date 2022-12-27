@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "bodymovin": "^4.13.0",
     "canvas-confetti": "^1.6.0",
     "fp-ts": "^2.13.1",
     "mithril": "^2.2.2",

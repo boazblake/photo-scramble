@@ -9,7 +9,10 @@
   --size: 400px;
   --fontSize: 1.3rem;
   --hilight: #1de9b6;
-  --backgroundColor: #e7ebee
+  --hint: orange;
+  --background: #e7ebee;
+  --secondBackground:  rgba(248,248,248,1);
+  --borderRadius: 3px;
 }
 
 #app {
@@ -46,6 +49,7 @@
   maxHeight: var(--size);
   width: var(--size);
   height: var(--size);
+  borderRadius: var(--borderRadius);
   transition: opacity 2s ease;
 }
 
@@ -65,18 +69,15 @@
 }
 
 .block {
+  border-radius:var(--borderRadius);
   transition: transform 3s ease;
   will-change: transform;
-}
-
-.hiddenBlock {
-  opacity: 0.1;
 }
 
 .row {
   display: flex;
   flex-flow: row;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-around;
 }
 
@@ -92,18 +93,18 @@
   outline: none;
   cursor: pointer;
   font-weight: 600;
-  border-radius: 3px;
+  border-radius: var(--borderRadius);
   padding: 12px 24px;
   border: 0;
   /* color: #3a4149; */
-  background: var(--backgroundColor);
+  background: var(--background);
   line-height: 1.15;
   font-size: 16px;
   margin: 10px 10px;
 }
 .btn:hover {
-  box-shadow: 0 0 0 0 #fff, 0 0 0 3px var(--hilight);
-  background: rgba(248,248,248,1);
+  box-shadow: 0 0 0 0 #fff, 0 0 0 var(--borderRadius) var(--hilight);
+  background: var(--secondBackground);
   text-decoration: inherit;
   transition-duration: 0s, 0.15s;
   color: #42526e;
@@ -140,7 +141,7 @@ input[type=checkbox] {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--backgroundColor);
+  background: var(--background);
 }
 
 .slider:before {
@@ -156,11 +157,11 @@ input[type=checkbox] {
 }
 
 input:checked + .slider {
-  background-color: orange;
+  background-color: var(--hint);
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px orange;
+  box-shadow: 0 0 1px var(--hint);
 }
 
 input:checked + .slider:before {
@@ -171,9 +172,9 @@ input:checked + .slider:before {
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+  border-radius: var(--borderRadius);
 }
 
 .slider.round:before {
-  border-radius: 50%;
+  border-radius: var(--borderRadius);
 }
