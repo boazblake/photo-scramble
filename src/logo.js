@@ -7,7 +7,7 @@ const makeLogo = ({ dom }) => {
     wrapper: svgContainer,
     animType: 'svg',
     loop: true,
-    path: 'assets/logo-lottie.json'
+    path: './assets/logo-lottie.json'
   });
 }
 
