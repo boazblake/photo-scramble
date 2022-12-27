@@ -1,7 +1,7 @@
 import m from 'mithril'
 import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getClass, getAction } from './model'
-import Loader from './loader/loader.png'
+import Loader from './loader/loader.gif'
 
 
 const Toolbar = {
