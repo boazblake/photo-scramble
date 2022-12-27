@@ -1,8 +1,8 @@
 import m from 'mithril'
 import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getClass, getAction } from './model'
-import Loader from './files/loader.gif'
-
+import Logo from './logo.js'
+import LogoStill from './files/logo/logo-still'
 
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
@@ -88,15 +88,17 @@ const ImageSelector = {
 
 
 const App = mdl => {
+
   return {
     view: () =>
       m('#app.col',
-        m('code.text', { style: { letterSpacing: '3px', fontSize: '2rem' } }, 'PHOTO SCRAMBLE!'),
+        m('code.text.row', { style: { letterSpacing: '3px', fontSize: '2rem' } }, mdl.img.src() && m('', { style: { width: '100px' } }, m(LogoStill)),
+          'PHOTO SCRAMBLE!'),
         m(Toolbar, { mdl }),
         mdl.swap.history.length > 0
         && m('.col',
-          m('pre.text', `Moves: ${mdl.state.userMoves()}`),
-          m('pre.text', `Minimum Moves: ${mdl.state.levels[mdl.state.level()].count}`)
+          m('pre.text', `Moves Made: ${mdl.state.userMoves()}`),
+          m('pre.text', `Minimum Moves To Finish: ${mdl.state.levels[mdl.state.level()].count - 1}`)
         ),
 
         mdl.img.src() ? [
@@ -125,8 +127,9 @@ const App = mdl => {
         ]
 
           : [
-            m('img', { src: Loader }),
-            m(ImageSelector, { mdl })]
+            m(Logo),
+            m(ImageSelector, { mdl })
+          ]
 
       )
   }
