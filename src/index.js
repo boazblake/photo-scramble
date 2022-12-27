@@ -12,7 +12,7 @@ const Toolbar = {
       mdl.state.status() == 'ready' && m("label.row",
         m('code', 'show hint'),
         m('label.switchContainer',
-          m("input.switch#hint", { type: 'checkbox', onclick: () => mdl.state.showHint(!mdl.state.showHint()) }),
+          m("input.switch#hint", { type: 'checkbox', onchange: () => mdl.state.showHint(!mdl.state.showHint()) }),
           m(".slider.round"),
         ))
     )
@@ -74,8 +74,8 @@ const Img = {
 
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
-    m('label.col.point',
-      m('code.text', { for: 'upload' }, 'Upload an Image.'),
+    m('fieldset.col.point',
+      m('legend.text', { for: 'upload' }, 'Upload an Image.'),
       m('input.btn',
         {
           name: 'upload',
@@ -103,8 +103,8 @@ const App = mdl => {
 
         mdl.img.src() ? [
           mdl.state.status() == 'select level' &&
-          m('.col',
-            m('code.text', 'Select a level'),
+          m('fieldset.col',
+            m('legend.text', m('code', 'Select a level')),
             m('.row', Object.keys(mdl.state.levels)
               .map(level =>
                 m('button.btn',
@@ -118,7 +118,7 @@ const App = mdl => {
             m('button.btn', {
               onclick: () => { mdl.state.level(null); mdl.state.status('select level') }
             }, 'change level'),
-            m('code.text', 'Select a boring square to hide')
+            m('legend.text', 'Select a boring square to hide')
           ],
 
           m('#viewer.row',

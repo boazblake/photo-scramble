@@ -23,6 +23,11 @@
   overflow:hidden;
 }
 
+fieldset {
+  border-color: var(--hilight);
+  border: 3px solid var(--hilight);
+}
+
 .grab {
   cursor: grab;
 }

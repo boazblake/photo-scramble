@@ -48,8 +48,8 @@
   ],
   "protocol_handlers": [
     {
-      "protocol": "photoscramble",
-      "url": "/"
+      "protocol": "web+photoscramble",
+      "url": "/%s"
     }
   ]
 }
