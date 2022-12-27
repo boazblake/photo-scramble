@@ -48,8 +48,8 @@
   ],
   "protocol_handlers": [
     {
-      "protocol": "web+coffee",
-      "url": "/coffee?type=%s"
+      "protocol": "photoscramble",
+      "url": "/"
     }
   ]
 }

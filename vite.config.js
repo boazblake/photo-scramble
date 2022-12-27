@@ -1,15 +1,14 @@
 import { defineConfig } from "vite"
 import { flowPlugin, esbuildFlowPlugin } from "@bunchtogether/vite-plugin-flow"
-
 import path from "path"
 
 export default defineConfig({
   optimizeDeps: { esbuildOptions: { plugins: [esbuildFlowPlugin()] } },
-  plugins: [flowPlugin()],
+  plugins: [flowPlugin(),],
   resolve: {
     alias: {
+      stream: "mithril-stream",
       m: "mithril",
-      Stream: "mithril-stream",
       "@": path.resolve(__dirname, "./src"),
     },
   },
@@ -18,6 +17,5 @@ export default defineConfig({
     port: 3000,
     open: true,
   },
-  base: './',
-})
-
+  base: './'
+});
