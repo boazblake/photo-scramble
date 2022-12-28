@@ -118,7 +118,7 @@ const App = mdl => {
             m('button.btn', {
               onclick: () => { mdl.state.level(null); mdl.state.status('select level') }
             }, 'change level'),
-            m('legend.text', 'Select a boring square to hide')
+            m('code.text', 'Select a boring square to hide')
           ],
 
           m('#viewer.row',
