@@ -221,6 +221,11 @@ input:checked + .slider:before {
   justify-content: space-around;
 }
 
+.fade-in{
+  opacity:0;
+  animation: fadeIn 1s ease-out 2s forwards;
+}
+
 @keyframes fadeIn {
 	0% {
 		opacity: 0;

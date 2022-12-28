@@ -106,7 +106,7 @@ const ImageSelector = {
 
 const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col',
-    m('code.text.row', { style: { letterSpacing: '3px', fontSize: '2rem' } }, mdl.img.src() && m('', { style: { width: '100px' } }, m(LogoStill)),
+    m('code.text.row', { style: { letterSpacing: '3px', fontSize: '2rem' } }, m('.fade-in', { style: { width: '100px' } }, m(LogoStill)),
       'PHOTO SCRAMBLE!'),
     m(Toolbar, { mdl }),
     mdl.swap.history.length > 0
