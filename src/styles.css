@@ -217,7 +217,7 @@ input:checked + .slider:before {
 }
 
 #user-info {
-  height: 100px;
+  height: 150px;
   justify-content: space-around;
 }
 
