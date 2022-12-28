@@ -74,7 +74,7 @@ const Img = {
 
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
-    m('fieldset.col.point',
+    m('fieldset.point.col',
       m('legend', m('code.text', { for: 'upload' }, 'Upload an Image.')),
       m('input.btn',
         {
