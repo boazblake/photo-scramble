@@ -26,6 +26,7 @@
 fieldset {
   border-color: var(--hilight);
   border: 3px solid var(--hilight);
+  align-self: center;
 }
 
 .grab {

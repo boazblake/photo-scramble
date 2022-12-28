@@ -74,7 +74,7 @@ const Img = {
 
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
-    m('fieldset.point.col',
+    m('fieldset.col.point',
       m('legend', m('code.text', { for: 'upload' }, 'Upload an Image.')),
       m('input.btn',
         {
@@ -104,7 +104,7 @@ const App = mdl => {
         mdl.img.src() ? [
           mdl.state.status() == 'select level' &&
           m('fieldset.col',
-            m('legend', m('code.text', 'Select a level')),
+            m('legend.text', m('code', 'Select a level')),
             m('.row', Object.keys(mdl.state.levels)
               .map(level =>
                 m('button.btn',
