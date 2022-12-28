@@ -184,3 +184,53 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: var(--borderRadius);
 }
+
+#logo-anim {
+  animation: logoAnim 2.5s ease 0s 1 reverse forwards;
+}
+
+@keyframes logoAnim {
+	0% {
+		transform: scale(10);
+    opacity: 0;
+	}
+
+	100% {
+		transform: scale(1);
+    opacity: 1;
+	}
+}
+
+#input-anim {
+  animation: inputAnim 3s ease-out 2s forwards;
+  position: absolute;
+  opacity:0;
+}
+
+@keyframes inputAnim {
+	0% {
+    opacity: 0;
+	}
+
+	100% {
+    opacity: 1;
+    justify-self: center;
+	}
+}
+
+#image-viewer {
+  animation: fadeIn 1s ease-out .2s 1 normal forwards;
+  opacity: 0;
+  height: 100%;
+  justify-content: space-around;
+}
+
+@keyframes fadeIn {
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}

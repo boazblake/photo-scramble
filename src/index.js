@@ -7,7 +7,10 @@ import LogoStill from './files/logo/logo-still'
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
     m('.row ',
-      mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New'),
+      mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New Image'),
+      mdl.state.status() == 'select square' && m('button.btn', {
+        onclick: () => { mdl.state.level(null); mdl.state.status('select level') }
+      }, 'Change Level'),
       mdl.state.status() == 'ready' && m('button.btn', { onclick: () => restart(mdl) }, 'Restart'),
       mdl.state.status() == 'ready' && m("label.row",
         m('code', 'show hint'),
@@ -71,11 +74,24 @@ const Img = {
     })
 }
 
-
+const LevelSelector = {
+  view: ({ attrs: { mdl } }) =>
+    m('fieldset.col',
+      m('legend.text', m('code', 'Select a level')),
+      m('.row', Object.keys(mdl.state.levels)
+        .map(level =>
+          m('button.btn',
+            {
+              style: { border: `2px solid var(--hilight)` },
+              onclick: () => selectLevel(mdl, level)
+            }, level))
+      )
+    )
+}
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
     m('fieldset.col.point',
-      m('legend.text', m('code.text', { for: 'upload' }, 'Upload an Image.')),
+      m('legend.text', m('code.text', m('label', { for: 'upload' }, 'Upload an Image.'))),
       m('input.btn',
         {
           name: 'upload',
@@ -87,48 +103,35 @@ const ImageSelector = {
 }
 
 
-const App = mdl => {
+const Header = {
+  view: ({ attrs: { mdl } }) => m('section#header',
+    m('code.text.row', { style: { letterSpacing: '3px', fontSize: '2rem' } }, mdl.img.src() && m('', { style: { width: '100px' } }, m(LogoStill)),
+      'PHOTO SCRAMBLE!'),
+    m(Toolbar, { mdl }),
+    mdl.swap.history.length > 0
+    && m('.col',
+      m('pre.text', `Moves Made: ${mdl.state.userMoves()}`),
+      m('pre.text', `Minimum Moves To Finish: ${mdl.state.levels[mdl.state.level()].count - 1}`)
+    ))
+}
 
+
+const App = mdl => {
   return {
     view: () =>
       m('#app.col',
-        m('code.text.row', { style: { letterSpacing: '3px', fontSize: '2rem' } }, mdl.img.src() && m('', { style: { width: '100px' } }, m(LogoStill)),
-          'PHOTO SCRAMBLE!'),
-        m(Toolbar, { mdl }),
-        mdl.swap.history.length > 0
-        && m('.col',
-          m('pre.text', `Moves Made: ${mdl.state.userMoves()}`),
-          m('pre.text', `Minimum Moves To Finish: ${mdl.state.levels[mdl.state.level()].count - 1}`)
-        ),
-
-        mdl.img.src() ? [
-          mdl.state.status() == 'select level' &&
-          m('fieldset.col',
-            m('legend.text', m('code', 'Select a level')),
-            m('.row', Object.keys(mdl.state.levels)
-              .map(level =>
-                m('button.btn',
-                  {
-                    style: { border: `2px solid var(--hilight)` },
-                    onclick: () => selectLevel(mdl, level)
-                  }, level))
-            )
-          ),
-          mdl.state.status() == 'select square' && [
-            m('button.btn', {
-              onclick: () => { mdl.state.level(null); mdl.state.status('select level') }
-            }, 'change level'),
-            m('code.text', 'Select a boring square to hide')
-          ],
-
-          m('#viewer.row',
-            mdl.state.status() !== 'completed' && m(Grid, { mdl })
-            , m(Img, { mdl }))
-        ]
+        m(Header, { mdl }),
+        mdl.img.src() ?
+          m('section.col#image-viewer',
+            mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
+            mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),
+            m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }),
+              m(Img, { mdl }))
+          )
 
           : [
-            m(Logo),
-            m(ImageSelector, { mdl })
+            m('#logo-anim', m(Logo)),
+            m('#input-anim', m(ImageSelector, { mdl }))
           ]
 
       )
