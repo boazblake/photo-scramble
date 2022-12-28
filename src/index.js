@@ -109,7 +109,7 @@ const Header = {
       'PHOTO SCRAMBLE!'),
     m(Toolbar, { mdl }),
     mdl.swap.history.length > 0
-    && m('.col',
+    && m('section.col#user-info',
       m('pre.text', `Moves Made: ${mdl.state.userMoves()}`),
       m('pre.text', `Minimum Moves To Finish: ${mdl.state.levels[mdl.state.level()].count - 1}`)
     ))

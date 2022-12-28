@@ -225,6 +225,11 @@ input:checked + .slider:before {
   justify-content: space-around;
 }
 
+#user-info {
+  height: 100px;
+  justify-content: space-around;
+}
+
 @keyframes fadeIn {
 	0% {
 		opacity: 0;
