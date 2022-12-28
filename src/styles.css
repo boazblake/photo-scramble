@@ -27,7 +27,6 @@ fieldset {
   border-color: var(--hilight);
   border: 3px solid var(--hilight);
   align-self: center;
-  max-width: 80lvw;
 }
 
 .grab {
@@ -203,21 +202,12 @@ input:checked + .slider:before {
 }
 
 #input-anim {
-  animation: inputAnim 3s ease-out 2s forwards;
-  position: absolute;
+  animation: fadeIn 1s ease-out 2s forwards;
   opacity:0;
+  position:absolute;
+  justify-self:center;
 }
 
-@keyframes inputAnim {
-	0% {
-    opacity: 0;
-	}
-
-	100% {
-    opacity: 1;
-    justify-self: center;
-	}
-}
 
 #image-viewer {
   animation: fadeIn 1s ease-out .2s 1 normal forwards;

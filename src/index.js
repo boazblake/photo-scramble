@@ -94,6 +94,7 @@ const ImageSelector = {
       m('legend.text', m('code.text', m('label', { for: 'upload' }, 'Upload an Image.'))),
       m('input.btn',
         {
+          style: { width: '80lvw' },
           name: 'upload',
           onchange: e => upload(mdl)(e).then(() => mdl.state.status('select level')),
           type: 'file',
@@ -121,19 +122,16 @@ const App = mdl => {
     view: () =>
       m('#app.col',
         m(Header, { mdl }),
-        mdl.img.src() ?
-          m('section.col#image-viewer',
+        mdl.img.src()
+          ? m('section.col#image-viewer',
             mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
             mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),
             m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }),
-              m(Img, { mdl }))
-          )
-
-          : [
+              m(Img, { mdl })))
+          : m('section.col',
             m('#logo-anim', m(Logo)),
             m('#input-anim', m(ImageSelector, { mdl }))
-          ]
-
+          )
       )
   }
 
