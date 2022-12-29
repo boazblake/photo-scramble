@@ -259,7 +259,7 @@ const getHeaderStyle = mdl => ({
 
 const getTitleStyle = mdl => ({
   left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
-  fontSize: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '3rem' : '2rem'
+  fontSize: '3rem'//mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '3rem' : '2rem'
 })
 
 export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle }
