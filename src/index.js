@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle } from './model'
+import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle } from './model'
 import { setupResponsiveness } from './utils'
 import Logo from './logo.js'
 import LogoStill from './files/logo/logo-still'
@@ -89,6 +89,7 @@ const LevelSelector = {
       )
     )
 }
+
 const ImageSelector = {
   view: ({ attrs: { mdl } }) =>
     m('fieldset.col.point',
@@ -103,7 +104,6 @@ const ImageSelector = {
         }),
     )
 }
-
 
 const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
@@ -134,7 +134,7 @@ const App = mdl => {
         mdl.img.src()
           ? m('section.col#image-viewer',
             m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
-          : m('section.col', { style: { justifyContent: 'center' } },
+          : m('section.col', { style: getInputAnimStyle(mdl) },
             m('#logo-anim', m(Logo)),
             m('#input-anim', m(ImageSelector, { mdl }))
           )

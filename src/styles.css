@@ -24,14 +24,13 @@
 
 #header {
   position:relative;
-  /* margin-top:25px; */
 }
 
 #title {
   position: static;
-  /* top:10px; */
   justify-content: center;
   letterSpacing: 3px;
+  fontSize: 3rem;
 }
 
 fieldset {

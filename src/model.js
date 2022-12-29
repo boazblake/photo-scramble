@@ -252,14 +252,17 @@ const getAppClass = mdl =>
 const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
 const getHeaderStyle = mdl => ({
-  height: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '80%' : '50%',
-  justifyContent: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-evenly' : 'flex-end'
+  height: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '90dvh' : '35dvh',
+  justifyContent: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-between' : 'flex-start'
 
 })
 
 const getTitleStyle = mdl => ({
   left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
-  fontSize: '3rem'//mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '3rem' : '2rem'
 })
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle }
+const getInputAnimStyle = mdl => ({
+  justifyContent: mdl.state.screenSize() == 'TABLET' && !mdl.img.src() ? 'center' : 'flex-start'
+})
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle }
