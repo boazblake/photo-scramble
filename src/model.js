@@ -14,7 +14,7 @@ const newModel = () => ({
     path: [],
   },
   state: {
-    screenSize: Stream(0),
+    screenSize: Stream('PHONE'),
     showHint: Stream(false),
     userMoves: Stream(0),
     status: Stream('select image'),
@@ -243,8 +243,13 @@ const getAction = (mdl, block) => mdl.state.hiddenBlock()
 
 
 const getAppClass = mdl =>
-  mdl.img.src() && mdl.state.screenSize() == 'LANDSCAPE' ? 'row' : 'col'
+  mdl.img.src() && mdl.state.screenSize() == 'TABLET' ? 'row' : 'col'
 
-const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'LANDSCAPE' && { justifyContent: 'space-between' }
+const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle }
+const getTitleStyle = mdl => ({
+  left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
+  justifyContent: 'center', letterSpacing: '3px', fontSize: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '3rem' : '2rem'
+})
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle }

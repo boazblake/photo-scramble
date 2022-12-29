@@ -5,20 +5,36 @@ window.log = m => v => {
   console.log(m, v)
   return v
 }
-const setupResponsiveness = (mdl) => {
 
-  const screenSizes = {
-    428: 'PORTRAIT',
-    832: 'LANDSCAPE'
+
+const getScreenOrientation = (mdl) => {
+  let winW = window.innerWidth
+  // set display profiles
+  const getProfile = (w) => {
+    if (w < 668) return "PHONE"
+    if (w < 920) return "TABLET"
+    return "DESKTOP"
   }
 
-  window.onresize = function () {
-    mdl.state.screenSize(screenSizes[window.innerWidth] || window.innerWidth)
-    console.log(window.innerWidth, mdl.state.screenSize())
-    m.redraw()
+  const checkWidth = (winW) => {
+    const w = window.innerWidth
+    if (winW !== w) {
+      winW = w
+      let lastProfile = mdl.state.screenSize()
+      mdl.state.screenSize(getProfile(w))
+      if (lastProfile != mdl.state.screenSize()) m.redraw()
+    }
+    return requestAnimationFrame(checkWidth)
   }
-  window.onresize()
+
+  mdl.state.screenSize(getProfile(winW))
+
+  checkWidth(winW)
+
 }
+
+const setupResponsiveness = (mdl) => getScreenOrientation(mdl)
+
 
 const getRandom = xs => xs[Math.floor(Math.random() * xs.length)]
 

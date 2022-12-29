@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, } from './model'
+import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle } from './model'
 import { setupResponsiveness } from './utils'
 import Logo from './logo.js'
 import LogoStill from './files/logo/logo-still'
@@ -107,7 +107,7 @@ const ImageSelector = {
 
 const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col',
-    m('code.text.row', { style: { justifyContent: 'center', letterSpacing: '3px', fontSize: '2rem' } }, 'PHOTO', m('#logo-still', m(LogoStill)),
+    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('#logo-still', m(LogoStill)),
       'SCRAMBLE!'),
     m(Toolbar, { mdl }),
     mdl.img.src() && [mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
@@ -133,7 +133,7 @@ const App = mdl => {
         mdl.img.src()
           ? m('section.col#image-viewer',
             m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
-          : m('section.col',
+          : m('section.col', { style: { justifyContent: 'inherit' } },
             m('#logo-anim', m(Logo)),
             m('#input-anim', m(ImageSelector, { mdl }))
           )
