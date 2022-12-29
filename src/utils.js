@@ -1,10 +1,24 @@
 import confetti from 'canvas-confetti'
+import m from 'mithril'
 
 window.log = m => v => {
   console.log(m, v)
   return v
 }
+const setupResponsiveness = (mdl) => {
 
+  const screenSizes = {
+    428: 'PORTRAIT',
+    832: 'LANDSCAPE'
+  }
+
+  window.onresize = function () {
+    mdl.state.screenSize(screenSizes[window.innerWidth] || window.innerWidth)
+    console.log(window.innerWidth, mdl.state.screenSize())
+    m.redraw()
+  }
+  window.onresize()
+}
 
 const getRandom = xs => xs[Math.floor(Math.random() * xs.length)]
 
@@ -48,5 +62,5 @@ const fireworks = () => {
 }
 
 export {
-  getRandom, distanceBetweenElements, uuid, fireworks
+  getRandom, distanceBetweenElements, uuid, fireworks, setupResponsiveness
 }

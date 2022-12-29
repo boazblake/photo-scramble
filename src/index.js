@@ -1,6 +1,7 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getClass, getAction } from './model'
+import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, } from './model'
+import { setupResponsiveness } from './utils'
 import Logo from './logo.js'
 import LogoStill from './files/logo/logo-still'
 
@@ -36,7 +37,7 @@ const Block = () => {
       return m('.block', {
         id: block.id,
         disabled: mdl.state.status() == 'completed',
-        class: getClass(mdl, block),
+        class: getBlockClass(mdl, block),
         onclick: getAction(mdl, block),
         draggable: isDraggable(mdl, block),
         style: { border: getBorder(mdl, block) },
@@ -109,6 +110,8 @@ const Header = {
     m('code.text.row', { style: { justifyContent: 'center', letterSpacing: '3px', fontSize: '2rem' } }, 'PHOTO', m('#logo-still', m(LogoStill)),
       'SCRAMBLE!'),
     m(Toolbar, { mdl }),
+    mdl.img.src() && [mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
+    mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),],
     mdl.swap.history.length > 0
     && m('section.col#user-info',
       m('pre.text', `Moves Made: ${mdl.state.userMoves()}`),
@@ -118,16 +121,18 @@ const Header = {
 
 
 const App = mdl => {
+  setupResponsiveness(mdl)
+
   return {
     view: () =>
-      m('#app.col',
+      m('#app', {
+        style: getAppStyle(mdl),
+        class: getAppClass(mdl)
+      },
         m(Header, { mdl }),
         mdl.img.src()
           ? m('section.col#image-viewer',
-            mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
-            mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),
-            m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }),
-              m(Img, { mdl })))
+            m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
           : m('section.col',
             m('#logo-anim', m(Logo)),
             m('#input-anim', m(ImageSelector, { mdl }))

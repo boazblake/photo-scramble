@@ -1,6 +1,8 @@
 import Stream from 'mithril-stream'
 import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
 
+
+
 const newModel = () => ({
   chunks: [],
   blocks: [],
@@ -12,6 +14,7 @@ const newModel = () => ({
     path: [],
   },
   state: {
+    screenSize: Stream(0),
     showHint: Stream(false),
     userMoves: Stream(0),
     status: Stream('select image'),
@@ -228,7 +231,7 @@ const getBorder = (mdl, block) =>
       : '3px solid var(--hilight)'
     : ''
 
-const getClass = (mdl, block) => isHiddenBlock(mdl, block)
+const getBlockClass = (mdl, block) => isHiddenBlock(mdl, block)
   ? 'isSwapBlock'
   : isSwapBlock(mdl, block)
     ? 'point isSwapBlock'
@@ -239,6 +242,9 @@ const getAction = (mdl, block) => mdl.state.hiddenBlock()
   : mdl.state.level() && mdl.state.status() !== 'completed' && selectHiddenBlockAndShuffle(mdl, block, 0)
 
 
+const getAppClass = mdl =>
+  mdl.img.src() && mdl.state.screenSize() == 'LANDSCAPE' ? 'row' : 'col'
 
+const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'LANDSCAPE' && { justifyContent: 'space-between' }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getClass, getAction }
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle }
