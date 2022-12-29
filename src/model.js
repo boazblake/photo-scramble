@@ -16,6 +16,7 @@ const newModel = () => ({
   state: {
     screenSize: Stream('PHONE'),
     showHint: Stream(false),
+    hintUsed: Stream(0),
     userMoves: Stream(0),
     status: Stream('select image'),
     hiddenBlock: Stream(null),
@@ -52,6 +53,7 @@ const newGame = mdl => {
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
   mdl.state.showHint(false)
+  mdl.state.hintUsed(0)
   mdl.state.level(null)
   mdl.state.userMoves(0)
   mdl.state.status('select image')
@@ -117,6 +119,7 @@ const restart = mdl => {
   mdl.state.direction('horizontal')
   mdl.state.level(null)
   mdl.state.showHint(false)
+  mdl.state.hintUsed(0)
   mdl.state.userMoves(0)
   mdl.blocks = []
   mdl.originals = []
@@ -167,6 +170,7 @@ const isDraggable = (mdl, block) => {
 }
 const moveBlock = (mdl, block, isUser) => {
   if (!mdl.swap.swapBlockIds.includes(block.id)) return
+  mdl.state.showHint() && mdl.state.hintUsed(mdl.state.hintUsed() + 1)
   let checkbox = document.getElementById('hint')
   if (checkbox) {
     checkbox.checked = false
@@ -247,9 +251,15 @@ const getAppClass = mdl =>
 
 const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
-const getTitleStyle = mdl => ({
-  left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
-  justifyContent: 'center', letterSpacing: '3px', fontSize: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '3rem' : '2rem'
+const getHeaderStyle = mdl => ({
+  height: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '80%' : '50%',
+  justifyContent: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-evenly' : 'flex-end'
+
 })
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle }
+const getTitleStyle = mdl => ({
+  left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
+  fontSize: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '3rem' : '2rem'
+})
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle }

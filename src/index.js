@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle } from './model'
+import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle } from './model'
 import { setupResponsiveness } from './utils'
 import Logo from './logo.js'
 import LogoStill from './files/logo/logo-still'
@@ -106,7 +106,7 @@ const ImageSelector = {
 
 
 const Header = {
-  view: ({ attrs: { mdl } }) => m('section#header.col',
+  view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
     m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('#logo-still', m(LogoStill)),
       'SCRAMBLE!'),
     m(Toolbar, { mdl }),
@@ -114,8 +114,9 @@ const Header = {
     mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),],
     mdl.swap.history.length > 0
     && m('section.col#user-info',
-      m('pre.text', `Moves Made: ${mdl.state.userMoves()}`),
-      m('pre.text', `Minimum Moves To Finish: ${mdl.state.levels[mdl.state.level()].count - 1}`)
+      m('code.text', `Moves Made: ${mdl.state.userMoves()}`),
+      mdl.state.hintUsed() > 0 && m('code.text', { style: { color: 'var(--hint)' } }, `Moves With Hint: ${mdl.state.hintUsed()}`),
+      m('code.text', `Perfect Score Is: ${mdl.state.levels[mdl.state.level()].count - 1}`)
     ))
 }
 
@@ -133,7 +134,7 @@ const App = mdl => {
         mdl.img.src()
           ? m('section.col#image-viewer',
             m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
-          : m('section.col', { style: { justifyContent: 'inherit' } },
+          : m('section.col', { style: { justifyContent: 'center' } },
             m('#logo-anim', m(Logo)),
             m('#input-anim', m(ImageSelector, { mdl }))
           )
