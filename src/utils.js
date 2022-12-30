@@ -77,6 +77,7 @@ const fireworks = () => {
   }, 250);
 }
 
+
 export {
   getRandom, distanceBetweenElements, uuid, fireworks, setupResponsiveness
 }
