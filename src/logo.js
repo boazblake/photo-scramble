@@ -18,6 +18,9 @@ const Logo = () => {
     view: () => m('.#logo-container.lottie', {
       'data-bm-renderer': 'svg',
       style: {
+        position: 'relative',
+        top: '-25%',
+        left: 0,
         width: 'var(--size)',
       }
     })

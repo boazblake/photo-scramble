@@ -252,8 +252,8 @@ const getAppClass = mdl =>
 const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
 const getHeaderStyle = mdl => ({
-  height: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? '90dvh' : '35dvh',
-  justifyContent: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-between' : 'flex-start'
+  height: mdl.state.screenSize() == 'TABLET' ? mdl.img.src() ? '50dvh' : '30dvh' : '75dvh',
+  justifyContent: 'space-between'//mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-between' : 'flex-start'
 
 })
 

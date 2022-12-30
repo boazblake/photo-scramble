@@ -109,9 +109,9 @@ const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
     m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('#logo-still', m(LogoStill)),
       'SCRAMBLE!'),
-    m(Toolbar, { mdl }),
     mdl.img.src() && [mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
     mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),],
+    m(Toolbar, { mdl }),
     mdl.swap.history.length > 0
     && m('section.col#user-info',
       m('code.text', `Moves Made: ${mdl.state.userMoves()}`),
