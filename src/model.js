@@ -1,8 +1,8 @@
 import Stream from 'mithril-stream'
 import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
 
-const SCREEN_SIZES = ['PHONE', 'TABLET', 'DESKTOP']
-const STATUS = ['READY', 'COMPLETED', 'SELECT_IMG', 'SELECT_SQR', 'SELECT_LEVEL']
+// const SCREEN_SIZES = ['PHONE', 'TABLET', 'DESKTOP']
+// const STATUS = ['READY', 'COMPLETED', 'SELECT_IMG', 'SELECT_SQR', 'SELECT_LEVEL']
 
 const newModel = () => ({
   chunks: [],
