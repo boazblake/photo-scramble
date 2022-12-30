@@ -251,9 +251,28 @@ const getAppClass = mdl =>
 
 const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
+const headerHeight = (size, hasImage) => {
+  switch (size) {
+    case 'PHONE': return '33dvh'
+    case 'TABLET': return hasImage ? '100dvh' : '33dvh'
+    case 'DESKTOP': return hasImage ? '70dvh' : '30dvh'
+  }
+}
+
+
+const justifyHeader = (mdl) => {
+  switch (mdl.state.screenSize()) {
+    case 'PHONE': return 'space-between'
+    case 'TABLET': return mdl.img.src() ? 'space-evenly' : ''
+    case 'DESKTOP': return mdl.img.src() ? '' : ''
+  }
+}
+
+
+
 const getHeaderStyle = mdl => ({
-  height: mdl.state.screenSize() == 'TABLET' ? mdl.img.src() ? '50dvh' : '30dvh' : mdl.img.src() ? '70dvh' : '30dvh',
-  justifyContent: 'space-between'//mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-between' : 'flex-start'
+  height: headerHeight(mdl.state.screenSize(), mdl.img.src()),
+  justifyContent: justifyHeader(mdl)
 
 })
 
