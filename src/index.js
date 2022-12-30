@@ -2,18 +2,19 @@ import m from 'mithril'
 import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle } from './model'
 import { setupResponsiveness } from './utils'
-import Logo from './logo.js'
-// import LogoStill from './files/logo/logo-still'
+import logo from './photo-scramble-logo.png'
+import loader from './logo-loader.gif'
+
 
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
     m('.row ',
       mdl.img.src() && m('button.btn', { onclick: () => newGame(mdl) }, 'New Image'),
-      mdl.state.status() == 'select square' && m('button.btn', {
-        onclick: () => { mdl.state.level(null); mdl.state.status('select level') }
+      mdl.state.status() == 'SELECT_SQR' && m('button.btn', {
+        onclick: () => { mdl.state.level(null); mdl.state.status('SELECT_LEVEL') }
       }, 'Change Level'),
-      mdl.state.status() == 'ready' && m('button.btn', { onclick: () => restart(mdl) }, 'Restart'),
-      mdl.state.status() == 'ready' && m("label.row",
+      mdl.state.status() == 'READY' && m('button.btn', { onclick: () => restart(mdl) }, 'Restart'),
+      mdl.state.status() == 'READY' && m("label.row",
         m('code', 'show hint'),
         m('label.switchContainer',
           m("input.switch#hint", { type: 'checkbox', onchange: () => mdl.state.showHint(!mdl.state.showHint()) }),
@@ -36,7 +37,7 @@ const Block = () => {
     view: ({ attrs: { mdl, block } }) => {
       return m('.block', {
         id: block.id,
-        disabled: mdl.state.status() == 'completed',
+        disabled: mdl.state.status() == 'COMPLETED',
         class: getBlockClass(mdl, block),
         onclick: getAction(mdl, block),
         draggable: isDraggable(mdl, block),
@@ -50,7 +51,7 @@ const Block = () => {
 const Grid = () => {
   return {
     onupdate: ({ attrs: { mdl } }) => {
-      if (mdl.state.status() == 'select square') {
+      if (mdl.state.status() == 'SELECT_SQR') {
         mdl.originals = JSON.stringify(mdl.blocks.map(({ id, coords }) => ({ id, coords })))
         return true
       }
@@ -98,7 +99,7 @@ const ImageSelector = {
         {
           style: { width: '80lvw' },
           name: 'upload',
-          onchange: e => upload(mdl)(e).then(() => mdl.state.status('select level')),
+          onchange: e => upload(mdl)(e).then(() => mdl.state.status('SELECT_LEVEL')),
           type: 'file',
           accept: 'image/gif, image/jpeg, image/png, image/*'
         }),
@@ -107,11 +108,11 @@ const ImageSelector = {
 
 const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
-    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m(Logo, { isLogo: true }),
+    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('img#logo-still', { src: logo, }),
       'SCRAMBLE!'),
-    mdl.img.src() && [mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
-    mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),],
-    m(Toolbar, { mdl }),
+    mdl.img.src() && [mdl.state.status() == 'SELECT_LEVEL' && m(LevelSelector, { mdl }),
+    mdl.state.status() == 'SELECT_SQR' && m('code.text', 'Select a boring square to hide'),],
+    mdl.state.screenSize() == 'TABLET' && m(Toolbar, { mdl }),
     mdl.swap.history.length > 0
     && m('section.col#user-info',
       m('code.text', `Moves Made: ${mdl.state.userMoves()}`),
@@ -133,9 +134,11 @@ const App = mdl => {
         m(Header, { mdl }),
         mdl.img.src()
           ? m('section.col#image-viewer',
-            m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
+            m('#viewer.row', mdl.state.status() !== 'COMPLETED' && m(Grid, { mdl }), m(Img, { mdl })),
+            mdl.state.screenSize() !== 'TABLET' && m(Toolbar, { mdl }))
+
           : m('section.col', { style: getInputAnimStyle(mdl) },
-            m('#logo-anim', m(Logo, { isLogo: false })),
+            m('#logo-anim', m('img', { src: loader, })),
             m('#input-anim', m(ImageSelector, { mdl }))
           )
       )

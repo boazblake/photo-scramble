@@ -1,7 +1,8 @@
 import Stream from 'mithril-stream'
 import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
 
-
+const SCREEN_SIZES = ['PHONE', 'TABLET', 'DESKTOP']
+const STATUS = ['READY', 'COMPLETED', 'SELECT_IMG', 'SELECT_SQR', 'SELECT_LEVEL']
 
 const newModel = () => ({
   chunks: [],
@@ -18,7 +19,7 @@ const newModel = () => ({
     showHint: Stream(false),
     hintUsed: Stream(0),
     userMoves: Stream(0),
-    status: Stream('select image'),
+    status: Stream('SELECT_IMG'),
     hiddenBlock: Stream(null),
     direction: Stream('horizontal'),
     size: Stream(0),
@@ -56,7 +57,7 @@ const newGame = mdl => {
   mdl.state.hintUsed(0)
   mdl.state.level(null)
   mdl.state.userMoves(0)
-  mdl.state.status('select image')
+  mdl.state.status('SELECT_IMG')
 
   mdl.swap.isDragging = false
   mdl.swap.src = { coords: null, idx: null, id: null, dom: null, img: null }
@@ -102,7 +103,7 @@ const splitImage = (mdl, image) => {
 
 const selectLevel = (mdl, level) => {
   mdl.state.level(level)
-  mdl.state.status('select square')
+  mdl.state.status('SELECT_SQR')
 }
 
 const upload = mdl => ({ target: { files } }) => {
@@ -125,7 +126,7 @@ const restart = mdl => {
   mdl.originals = []
   mdl.img.display(true)
 
-  upload(mdl)({ target: { files: [mdl.file] } }).then(() => mdl.state.status('select level'))
+  upload(mdl)({ target: { files: [mdl.file] } }).then(() => mdl.state.status('SELECT_LEVEL'))
 }
 
 
@@ -147,9 +148,9 @@ const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
 
   mdl.state.hiddenBlock(id)
   mdl.swap.swapBlockIds = getNeighbourIds(id, target)
-  if (mdl.state.status() == 'ready' &&
+  if (mdl.state.status() == 'READY' &&
     calcStepsLeft(mdl) == 0) {
-    mdl.state.status('completed')
+    mdl.state.status('COMPLETED')
     mdl.img.display(true)
     fireworks()
   }
@@ -196,7 +197,7 @@ const setBackground = (mdl, block, dom) => {
 
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
   if (count == mdl.state.levels[mdl.state.level()].count) {
-    mdl.state.status('ready')
+    mdl.state.status('READY')
     mdl.swap.path = [...mdl.swap.history]
     return (mdl)
   } else if (count == 0) {
@@ -229,7 +230,7 @@ const calculateMovesLeft = mdl => {
 }
 
 const getBorder = (mdl, block) =>
-  mdl.state.status() == 'select square' || (isSwapBlock(mdl, block) && mdl.state.status() !== 'completed')
+  mdl.state.status() == 'SELECT_SQR' || (isSwapBlock(mdl, block) && mdl.state.status() !== 'COMPLETED')
     ? isLastHistoryBlock(mdl, block) && mdl.state.showHint()
       ? '3px solid var(--hint)'
       : '3px solid var(--hilight)'
@@ -239,11 +240,11 @@ const getBlockClass = (mdl, block) => isHiddenBlock(mdl, block)
   ? 'isSwapBlock'
   : isSwapBlock(mdl, block)
     ? 'point isSwapBlock'
-    : mdl.state.status() == 'select square' && 'point'
+    : mdl.state.status() == 'SELECT_SQR' && 'point'
 
 const getAction = (mdl, block) => mdl.state.hiddenBlock()
   ? () => moveBlock(mdl, block, true)
-  : mdl.state.level() && mdl.state.status() !== 'completed' && selectHiddenBlockAndShuffle(mdl, block, 0)
+  : mdl.state.level() && mdl.state.status() !== 'COMPLETED' && selectHiddenBlockAndShuffle(mdl, block, 0)
 
 
 const getAppClass = mdl =>
@@ -255,16 +256,16 @@ const headerHeight = (size, hasImage) => {
   switch (size) {
     case 'PHONE': return '33dvh'
     case 'TABLET': return hasImage ? '100dvh' : '33dvh'
-    case 'DESKTOP': return hasImage ? '70dvh' : '30dvh'
+    case 'DESKTOP': return hasImage ? '30dvh' : '30dvh'
   }
 }
 
 
 const justifyHeader = (mdl) => {
   switch (mdl.state.screenSize()) {
-    case 'PHONE': return 'space-between'
-    case 'TABLET': return mdl.img.src() ? 'space-evenly' : ''
-    case 'DESKTOP': return mdl.img.src() ? '' : ''
+    case 'PHONE': return 'space-around'
+    case 'TABLET': return mdl.img.src() ? 'space-evenly' : 'space-evenly'
+    case 'DESKTOP': return mdl.img.src() ? 'space-evenly' : 'space-evenly'
   }
 }
 
