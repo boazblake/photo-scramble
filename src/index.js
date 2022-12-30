@@ -107,7 +107,7 @@ const ImageSelector = {
 
 const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
-    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m(Logo, { still: true }),
+    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m(Logo, { isLogo: true }),
       'SCRAMBLE!'),
     mdl.img.src() && [mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
     mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),],
@@ -135,7 +135,7 @@ const App = mdl => {
           ? m('section.col#image-viewer',
             m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
           : m('section.col', { style: getInputAnimStyle(mdl) },
-            m('#logo-anim', m(Logo, { still: false })),
+            m('#logo-anim', m(Logo, { isLogo: false })),
             m('#input-anim', m(ImageSelector, { mdl }))
           )
       )

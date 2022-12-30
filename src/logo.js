@@ -1,5 +1,7 @@
 import m from 'mithril'
 import bodymovin from 'lottie-web'
+import logo from './photo-scramble-logo.png'
+import loader from './loader.gif'
 // import { logoLotti } from './files/logo/logo-lottie'
 
 const makeLogo = ({ dom }) => {
@@ -14,7 +16,7 @@ const makeLogo = ({ dom }) => {
 
 const LogoStill = () => {
   return {
-    view: ({ attrs: { still } }) => still ? m(`img#logo-still`, { src: 'assets/images/photo-scramble-logo.png', }) : m(`img`, { src: 'assets/images/loader.gif', })
+    view: ({ attrs: { isLogo } }) => isLogo ? m(`img#logo-still`, { src: logo, }) : m(`img`, { src: loader, })
     // oncreate: makeLogo,
     // view: () => m('.#logo-container.lottie', {
     //   'data-bm-renderer': 'svg',
