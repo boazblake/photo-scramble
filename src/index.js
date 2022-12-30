@@ -3,7 +3,7 @@ import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle } from './model'
 import { setupResponsiveness } from './utils'
 import Logo from './logo.js'
-import LogoStill from './files/logo/logo-still'
+// import LogoStill from './files/logo/logo-still'
 
 const Toolbar = {
   view: ({ attrs: { mdl } }) =>
@@ -107,7 +107,7 @@ const ImageSelector = {
 
 const Header = {
   view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
-    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('#logo-still', m(LogoStill)),
+    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m(Logo, { still: true }),
       'SCRAMBLE!'),
     mdl.img.src() && [mdl.state.status() == 'select level' && m(LevelSelector, { mdl }),
     mdl.state.status() == 'select square' && m('code.text', 'Select a boring square to hide'),],
@@ -135,7 +135,7 @@ const App = mdl => {
           ? m('section.col#image-viewer',
             m('#viewer.row', mdl.state.status() !== 'completed' && m(Grid, { mdl }), m(Img, { mdl })))
           : m('section.col', { style: getInputAnimStyle(mdl) },
-            m('#logo-anim', m(Logo)),
+            m('#logo-anim', m(Logo, { still: false })),
             m('#input-anim', m(ImageSelector, { mdl }))
           )
       )

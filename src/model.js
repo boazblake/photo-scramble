@@ -252,13 +252,14 @@ const getAppClass = mdl =>
 const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
 const getHeaderStyle = mdl => ({
-  height: mdl.state.screenSize() == 'TABLET' ? mdl.img.src() ? '50dvh' : '30dvh' : '75dvh',
+  height: mdl.state.screenSize() == 'TABLET' ? mdl.img.src() ? '50dvh' : '30dvh' : mdl.img.src() ? '70dvh' : '30dvh',
   justifyContent: 'space-between'//mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 'space-between' : 'flex-start'
 
 })
 
 const getTitleStyle = mdl => ({
   left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
+  fontSize: '3rem'
 })
 
 const getInputAnimStyle = mdl => ({

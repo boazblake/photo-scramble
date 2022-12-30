@@ -1,6 +1,6 @@
 import m from 'mithril'
 import bodymovin from 'lottie-web'
-import { logoLotti } from './files/logo/logo-lottie'
+// import { logoLotti } from './files/logo/logo-lottie'
 
 const makeLogo = ({ dom }) => {
   bodymovin.loadAnimation({
@@ -12,20 +12,21 @@ const makeLogo = ({ dom }) => {
   });
 }
 
-const Logo = () => {
+const LogoStill = () => {
   return {
-    oncreate: makeLogo,
-    view: () => m('.#logo-container.lottie', {
-      'data-bm-renderer': 'svg',
-      style: {
-        position: 'relative',
-        top: '-25%',
-        left: 0,
-        width: 'var(--size)',
-      }
-    })
+    view: ({ attrs: { still } }) => still ? m(`img#logo-still`, { src: 'assets/images/photo-scramble-logo.png', }) : m(`img`, { src: 'assets/images/loader.gif', })
+    // oncreate: makeLogo,
+    // view: () => m('.#logo-container.lottie', {
+    //   'data-bm-renderer': 'svg',
+    //   style: {
+    //     position: 'relative',
+    //     top: '-25%',
+    //     left: 0,
+    //     width: 'var(--size)',
+    //   }
+    // })
   }
 }
 
 
-export default Logo
+export default LogoStill
