@@ -55,15 +55,12 @@ fieldset {
 
 #img {
   position: absolute;
-  max-width: var(--size);
+  height: auto;
   width: var(--size);
-  height: var(--size);
   minWidth: var(--size);
   minHeight: var(--size);
-  maxWidth: var(--size);
   maxHeight: var(--size);
-  width: var(--size);
-  height: var(--size);
+  max-width: 100%;
   borderRadius: var(--borderRadius);
   transition: opacity 2s ease;
 }

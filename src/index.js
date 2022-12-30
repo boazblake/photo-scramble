@@ -71,6 +71,8 @@ const Img = {
       },
       'src': mdl.img.src(),
       style: {
+        width: 'var(--size)',
+        height: 'var(--size)',
         opacity: mdl.img.display() ? 1 : 0.2
       }
     })
@@ -134,9 +136,9 @@ const App = mdl => {
         m(Header, { mdl }),
         mdl.img.src()
           ? m('section.col#image-viewer',
-            m('#viewer.row', mdl.state.status() !== 'COMPLETED' && m(Grid, { mdl }), m(Img, { mdl })),
+            m('#viewer.row',
+              mdl.state.status() !== 'COMPLETED' && m(Grid, { mdl }), m(Img, { mdl })),
             mdl.state.screenSize() !== 'TABLET' && m(Toolbar, { mdl }))
-
           : m('section.col', { style: getInputAnimStyle(mdl) },
             m('#logo-anim', m('img', { src: loader, })),
             m('#input-anim', m(ImageSelector, { mdl }))
