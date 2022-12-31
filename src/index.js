@@ -17,7 +17,11 @@ const Toolbar = {
       mdl.state.status() == 'READY' && m("label.row",
         m('code', 'show hint'),
         m('label.switchContainer',
-          m("input.switch#hint", { type: 'checkbox', onchange: () => mdl.state.showHint(!mdl.state.showHint()) }),
+          m("input.switch#hint", {
+            type: 'checkbox',
+            disabled: mdl.state.showHint() == true,
+            onchange: () => mdl.state.showHint(!mdl.state.showHint())
+          }),
           m(".slider.round"),
         ))
     )
