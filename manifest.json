@@ -2,13 +2,13 @@
   "theme_color": "#f69435",
   "background_color": "#f69435",
   "display": "fullscreen",
-  "start_url": "https://boazblake.github.io/photo-scramble/",
+  "start_url": "/photo-scramble/#!/",
   "scope": "/",
   "name": "Photo Scramble",
   "short_name": "Photo Scrambler",
   "description": "Photo Scrambler Game",
   "orientation": "portrait",
-  "id": "/photo-scramble/",
+  "id": "/photo-scramble/#!/",
   "icons": [
     {
       "src": "/images/icon-72x72.png",
