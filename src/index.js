@@ -2,8 +2,8 @@ import m from 'mithril'
 import './styles.css'
 import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle } from './model'
 import { setupResponsiveness, } from './utils'
-import logo from './photo-scramble-logo.png'
-import loader from './logo-loader.gif'
+import logo from './images/photo-scramble-logo.png'
+import loader from './images/logo-loader.gif'
 
 
 const Toolbar = {
