@@ -5,7 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "canvas-confetti": "^1.6.0",
-    "lottie-web": "^5.10.0",
     "mithril": "^2.2.2",
     "mithril-stream": "^2.0.0"
   },

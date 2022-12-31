@@ -20,14 +20,14 @@ const getScreenOrientation = (mdl) => {
     const w = window.innerWidth
     if (winW !== w) {
       winW = w
-      let lastProfile = mdl.state.screenSize()
-      mdl.state.screenSize(getProfile(w))
-      if (lastProfile != mdl.state.screenSize()) m.redraw()
+      let lastProfile = mdl.state.screenSize
+      mdl.state.screenSize = getProfile(w)
+      if (lastProfile != mdl.state.screenSize) m.redraw()
     }
     return requestAnimationFrame(checkWidth)
   }
 
-  mdl.state.screenSize(getProfile(winW))
+  mdl.state.screenSize = getProfile(winW)
 
   checkWidth(winW)
 
