@@ -2,7 +2,7 @@
   "theme_color": "#f69435",
   "background_color": "#f69435",
   "display": "fullscreen",
-  "start_url": "/photo-scramble/#!",
+  "start_url": "/photo-scramble/#!/",
   "scope": "/",
   "name": "Photo Scramble",
   "short_name": "Photo Scrambler",
