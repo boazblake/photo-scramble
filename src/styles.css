@@ -130,10 +130,14 @@ fieldset {
   margin:inherit;
 }
 
+dialog {
+  border: 3px solid orange;
+}
+
 /* The switch - the box around the slider */
 .switchContainer {
   position: relative;
-  display: inline-block;
+  display: flex;
   width: 60px;
   height: 34px;
 }
@@ -148,7 +152,6 @@ input[type=checkbox] {
 /* The slider */
 .slider {
   position: absolute;
-  cursor: pointer;
   top: 0;
   left: 0;
   right: 0;

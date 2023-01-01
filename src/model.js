@@ -3,12 +3,28 @@ import Stream from 'mithril-stream'
 import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
 
 // const SCREEN_SIZES = ['PHONE', 'TABLET', 'DESKTOP']
-// const STATUS = ['READY', 'COMPLETED', 'SELECT_IMG', 'SELECT_SQR', 'SELECT_LEVEL']
+// const STATUS = ['READY', 'COMPLETED', 'SELECT_IMG', 'SELECT_SQR', 'SELECT_LEVEL', 'SHUFFLING']
 
 const newModel = () => ({
   chunks: [],
   blocks: [],
   originals: [],
+  help:
+  {
+    toggles: [
+      { isDisabled: mdl => mdl.state.showHint() || mdl.state.showOriginalImage(), id: 'showHint', label: 'Show Hint', action: mdl => mdl.state.showHint(!mdl.state.showHint()) },
+      {
+        isDisabled: (mdl) => mdl.state.showHiddenImage() && mdl.state.showHint(),
+        id: 'originalimage',
+        label: 'Show Original Image', action: mdl => {
+          mdl.img.display(!mdl.img.display())
+          mdl.state.showOriginalImage(!mdl.state.showOriginalImage())
+        }
+      },
+      // { isDisabled: mdl => mdl.state.showOriginalImage(), id: 'hiddensquare', label: 'Toggle hidden square', action: mdl => mdl.state.showHiddenImage(!mdl.state.showHiddenImage()) }
+    ]
+  }
+  ,
   swap: {
     isDragging: false,
     swapBlockIds: [],
@@ -16,7 +32,10 @@ const newModel = () => ({
     path: [],
   },
   state: {
+    showHelp: Stream(false),
     screenSize: Stream('PHONE'),
+    showOriginalImage: Stream(false),
+    showHiddenImage: Stream(false),
     showHint: Stream(false),
     hintUsed: Stream(0),
     userMoves: Stream(0),
@@ -55,6 +74,9 @@ const newGame = mdl => {
   mdl.state.hiddenBlock(null)
   mdl.state.direction('horizontal')
   mdl.state.showHint(false)
+  mdl.state.showOriginalImage(false)
+  mdl.state.showHiddenImage(false)
+  mdl.state.showHelp(false)
   mdl.state.hintUsed(0)
   mdl.state.level(null)
   mdl.state.userMoves(0)
@@ -121,6 +143,9 @@ const restart = mdl => {
   mdl.state.direction('horizontal')
   mdl.state.level(null)
   mdl.state.showHint(false)
+  mdl.state.showOriginalImage(false)
+  mdl.state.showHiddenImage(false)
+  mdl.state.showHelp(false)
   mdl.state.hintUsed(0)
   mdl.state.userMoves(0)
   mdl.blocks = []
@@ -134,8 +159,10 @@ const restart = mdl => {
 const calcStepsLeft = mdl => {
   const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
   const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
-  return original.map((original, idx) => original == current[idx]).reduce((total, next) =>
-    next ? total : total + 1, 0)
+  return original.map((original, idx) => original == current[idx])
+    // .map(log('wtf'))
+    .reduce((total, next) =>
+      next ? total : total + 1, 0)
 }
 
 const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
@@ -173,7 +200,7 @@ const isDraggable = (mdl, block) => {
 const moveBlock = (mdl, block, isUser) => {
   if (!mdl.swap.swapBlockIds.includes(block.id)) return
   mdl.state.showHint() && mdl.state.hintUsed(mdl.state.hintUsed() + 1)
-  let checkbox = document.getElementById('hint')
+  let checkbox = document.getElementById('showHint')
   if (checkbox) {
     checkbox.checked = false
     mdl.state.showHint(false)
@@ -209,6 +236,7 @@ const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
     mdl.swap.path = [...mdl.swap.history]
     return mdl
   } else if (count == 0) {
+    mdl.state.status('SHUFFLING')
     selectHiddenBlock(mdl, block.id)({ target })
     return shuffleBoard(mdl, block, count + 1, target)
   } else if (count > 0) {
@@ -294,4 +322,15 @@ const getInputAnimStyle = mdl => ({
   justifyContent: mdl.state.screenSize() == 'TABLET' && !mdl.img.src() ? 'center' : 'flex-start'
 })
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle }
+const getImgStyle = mdl => ({
+  width: 'var(--size)',
+  height: 'var(--size)',
+  zIndex: mdl.img.display() ? 1000 : 0,
+  opacity: () => mdl.img.display() ? 1 : 0.2
+})
+
+const getToggleStyle = isDisabled => ({
+  cursor: isDisabled ? 'not-allowed' : 'pointer'
+})
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle, getImgStyle, getToggleStyle }
