@@ -117,7 +117,7 @@ const Header = {
     m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('img#logo-still', { src: logo, }),
       'SCRAMBLE!'),
     mdl.img.src() && [mdl.state.status() == 'SELECT_LEVEL' && m(LevelSelector, { mdl }),
-    mdl.state.status() == 'SELECT_SQR' && m('code.text', 'Select a boring square to hide'),],
+    mdl.state.status() == 'SELECT_SQR' && m('code.text', 'Next, select a boring square on the grid to hide'),],
     mdl.state.screenSize() == 'TABLET' && m(Toolbar, { mdl }),
     mdl.swap.history.length > 0
     && m('section.col#user-info',

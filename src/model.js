@@ -1,3 +1,4 @@
+import m from 'mithril'
 import Stream from 'mithril-stream'
 import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
 
@@ -195,26 +196,33 @@ const setBackground = (mdl, block, dom) => {
   dom.style.backgroundRepeat = 'no-repeat'
 }
 
+const shuffleBoard = (mdl, block, count, target) =>
+  setTimeout(() => {
+    selectHiddenBlockAndShuffle(mdl, block, count)({ target })
+    m.redraw()
+  }, 10)
+
+
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
   if (count == mdl.state.levels[mdl.state.level()].count) {
     mdl.state.status('READY')
     mdl.swap.path = [...mdl.swap.history]
-    return (mdl)
+    return mdl
   } else if (count == 0) {
     selectHiddenBlock(mdl, block.id)({ target })
-    return selectHiddenBlockAndShuffle(mdl, block, count + 1)({ target })
+    return shuffleBoard(mdl, block, count + 1, target)
   } else if (count > 0) {
     const lastId = mdl.swap.history.slice(-2)[0]
     let filtered = mdl.swap.swapBlockIds.filter(id => id !== lastId)
     const randomUuid = getRandom(filtered)
-    if (randomUuid == undefined) {
+    if (!randomUuid) {
       count = mdl.state.levels[mdl.state.level()].count
-      return selectHiddenBlockAndShuffle(mdl, block, count)({ target: block.dom })
+      shuffleBoard(mdl, block, count, block.dom)
     }
     const nextBlock = mdl.blocks.find(b => b.id == randomUuid)
     const nextTarget = block.dom
     moveBlock(mdl, nextBlock)
-    return selectHiddenBlockAndShuffle(mdl, nextBlock, count + 1)({ target: nextTarget })
+    return shuffleBoard(mdl, block, count + 1, nextTarget)
   }
 }
 
