@@ -133,18 +133,21 @@ const ImageSelector = {
 }
 
 const Header = {
-  view: ({ attrs: { mdl } }) => m('section#header.col', { style: getHeaderStyle(mdl) },
-    m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('img#logo-still', { src: logo, }),
-      'SCRAMBLE!'),
-    mdl.img.src() && [mdl.state.status() == 'SELECT_LEVEL' && m(LevelSelector, { mdl }),
-    mdl.state.status() == 'SELECT_SQR' && m('code.text', 'Next, select a boring square on the grid to hide'),],
-    mdl.state.screenSize() == 'TABLET' && m(Toolbar, { mdl }),
-    mdl.swap.history.length > 0
-    && m('section.col#user-info',
-      m('code.text', `Moves Made: ${mdl.state.userMoves()}`),
-      mdl.state.hintUsed() > 0 && m('code.text', { style: { color: 'var(--hint)' } }, `Moves With Hint: ${mdl.state.hintUsed()}`),
-      m('code.text', `Perfect Score Is: ${mdl.state.levels[mdl.state.level()].count - 1}`)
-    ))
+  view: ({ attrs: { mdl } }) =>
+    m('section#header.col', { style: getHeaderStyle(mdl) },
+      m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('img#logo-still', { src: logo, }),
+        'SCRAMBLE!'),
+      mdl.img.src() && m('.row',
+        mdl.state.status() == 'SELECT_LEVEL' && m(LevelSelector, { mdl }),
+        mdl.state.status() == 'SELECT_SQR' && m('code.text', 'Next, select a boring square on the grid to hide'))
+      ,
+      mdl.swap.history.length > 0 && m('section.col#user-info',
+        m('code.text', `Moves Made: ${mdl.state.userMoves()}`),
+        mdl.state.hintUsed() > 0 && m('code.text', { style: { color: 'var(--hint)' } }, `Moves With Hint: ${mdl.state.hintUsed()}`),
+        m('code.text', `Perfect Score Is: ${mdl.state.levels[mdl.state.level()].count - 1}`)
+      ),
+      mdl.state.screenSize() == 'TABLET' && m(Toolbar, { mdl }),
+    )
 }
 
 
