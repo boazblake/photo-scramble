@@ -216,6 +216,7 @@ input:checked + .slider:before {
   animation: fadeIn 1s ease-out 2s forwards;
   opacity:0;
   position:absolute;
+  top: 50dvh;
   justify-self:center;
 }
 

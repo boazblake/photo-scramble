@@ -128,7 +128,7 @@ const ImageSelector = {
       m('legend.text', m('code.text', m('label', { for: 'upload' }, 'Upload an Image.'))),
       m('input.btn',
         {
-          style: { width: '80lvw' },
+          style: { width: '80lvw', top: '250px' },
           name: 'upload',
           onchange: e => upload(mdl)(e).then(() => mdl.state.status('SELECT_LEVEL')),
           type: 'file',
