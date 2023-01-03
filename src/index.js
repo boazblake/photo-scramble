@@ -70,7 +70,7 @@ const Help = () => {
         m('form.col',
           mdl.help.toggles.map(({ label, id, action, isDisabled }) =>
             m(Toggle, { mdl, label, id, action, isDisabled })),
-          m('button.btn', { onclick: (e) => { e.preventDefault(); downloadImg(mdl) } }, 'Share')
+          // m('button.btn', { onclick: (e) => { e.preventDefault(); downloadImg(mdl) } }, 'Share')
         )
       )
   }
