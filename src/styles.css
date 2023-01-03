@@ -50,7 +50,7 @@ fieldset {
   position: relative;
   max-width: var(--size);
   width: var(--size);
-  height: 100%;
+  height: var(--size);
 }
 
 #img {

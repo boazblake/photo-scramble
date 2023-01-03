@@ -7,7 +7,7 @@
   "name": "Photo Scramble",
   "short_name": "Photo Scrambler",
   "description": "Photo Scrambler Game",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "id": "/photo-scramble/#!/",
   "icons": [
     {

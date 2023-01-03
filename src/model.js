@@ -107,13 +107,16 @@ const getNeighbourIds = (id, target) => {
 const splitImage = (mdl, image) => {
   const width = image.width;
   const height = image.height;
+  // console.log(mdl)
   const chunkWidth = Math.ceil(width / 16);
+  // console.log(width, chunkWidth)
   const chunks = []
   for (let x = 0; x < width; x += chunkWidth) {
     const chunkCanvas = document.createElement('canvas');
     const chunkContext = chunkCanvas.getContext('2d');
     chunkCanvas.width = chunkWidth;
     chunkCanvas.height = height;
+    //top left x top left y, 100, 100, 0,0, 100,100
     chunkContext.drawImage(image, x, 0, chunkWidth, height, 0, 0, chunkWidth, height);
     chunkContext.clip()
     chunks.push(chunkCanvas.toDataURL());
@@ -333,4 +336,40 @@ const getToggleStyle = isDisabled => ({
   cursor: isDisabled ? 'not-allowed' : 'pointer'
 })
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle, getImgStyle, getToggleStyle }
+const downloadImg = mdl => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const image = new Image();
+  image.src = mdl.img.src();
+  image.onload = () => {
+    mdl.blocks.forEach(({ coords }, index) => {
+      // Calculate the source and destination coordinates for the image
+      const sx = mdl.img.coords.left - coords.left;
+      const sy = mdl.img.coords.top - coords.top;
+      const dx = (index % 4) * coords.width;
+      const dy = Math.floor(index / 4) * coords.height;
+
+      // Draw the image onto the canvas
+      ctx.drawImage(image, sx, sy, coords.width, coords.height, dx, dy, coords.width, coords.height);
+      // const { x, y } = { x: mdl.img.coords.left - coords.left, y: mdl.img.coords.top - coords.top }
+      // console.log(x, y)
+      const dataURL = canvas.toDataURL();
+
+      // Create a download link and trigger a download
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = 'image.png';
+      link.click();
+    })
+
+    const link = document.createElement('a');
+    link.href = mdl.img.src();
+    link.download = 'image.png';
+    link.click();
+  }
+
+
+
+}
+
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle, getImgStyle, getToggleStyle, downloadImg }

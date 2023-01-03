@@ -11,7 +11,7 @@ const getScreenOrientation = (mdl) => {
   let winW = window.innerWidth
   // set display profiles
   const getProfile = (w) => {
-    if (w < 668) return "PHONE"
+    if (w < 600) return "PHONE"
     if (w < 920) return "TABLET"
     return "DESKTOP"
   }
