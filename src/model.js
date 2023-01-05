@@ -230,7 +230,7 @@ const shuffleBoard = (mdl, block, count, target) =>
   setTimeout(() => {
     selectHiddenBlockAndShuffle(mdl, block, count)({ target })
     m.redraw()
-  }, 10)
+  }, 30)
 
 
 const selectHiddenBlockAndShuffle = (mdl, block, count) => ({ target }) => {
@@ -279,7 +279,7 @@ const getBlockClass = (mdl, block) => isHiddenBlock(mdl, block)
   ? 'isSwapBlock'
   : isSwapBlock(mdl, block)
     ? 'point isSwapBlock'
-    : mdl.state.status() == 'SELECT_SQR' && 'point'
+    : mdl.state.status() == 'SELECT_SQR' ? 'point' : ''
 
 const getAction = (mdl, block) => mdl.state.hiddenBlock()
   ? () => moveBlock(mdl, block, true)
@@ -340,32 +340,36 @@ const downloadImg = mdl => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   const image = new Image();
+  const width = 400
+  const height = 400
   image.src = mdl.img.src();
+
+  console.log(mdl.img.coords)
+  let doms = Array.from(mdl.state.dom.children)
+  let coords = doms.map(d => d.style.backgroundPosition).map(c => c.split('px')).map(([x, y]) => ({ x, y }))
+  console.log(coords)
+  // console.log(coords)
   image.onload = () => {
-    mdl.blocks.forEach(({ coords }, index) => {
+    coords.forEach(({ x, y }) => {
       // Calculate the source and destination coordinates for the image
-      const sx = mdl.img.coords.left - coords.left;
-      const sy = mdl.img.coords.top - coords.top;
-      const dx = (index % 4) * coords.width;
-      const dy = Math.floor(index / 4) * coords.height;
+      const sx = mdl.img.coords.left - x;
+      const sy = mdl.img.coords.top - y;
+      const dx = sx//(index % 4) * coords.width;
+      const dy = sy//Math.floor(index / 4) * coords.height;
 
       // Draw the image onto the canvas
-      ctx.drawImage(image, sx, sy, coords.width, coords.height, dx, dy, coords.width, coords.height);
+      ctx.drawImage(image, sx, sy, height, width, dx, dy, width, height);
       // const { x, y } = { x: mdl.img.coords.left - coords.left, y: mdl.img.coords.top - coords.top }
       // console.log(x, y)
-      const dataURL = canvas.toDataURL();
 
       // Create a download link and trigger a download
-      const link = document.createElement('a');
-      link.href = dataURL;
-      link.download = 'image.png';
-      link.click();
     })
+    const dataURL = canvas.toDataURL();
 
-    const link = document.createElement('a');
-    link.href = mdl.img.src();
-    link.download = 'image.png';
-    link.click();
+    // const link = document.createElement('a');
+    // link.href = dataURL
+    // link.download = 'image.png';
+    // link.click();
   }
 
 

@@ -70,7 +70,7 @@ const Help = () => {
         m('form.col',
           mdl.help.toggles.map(({ label, id, action, isDisabled }) =>
             m(Toggle, { mdl, label, id, action, isDisabled })),
-          // m('button.btn', { onclick: (e) => { e.preventDefault(); downloadImg(mdl) } }, 'Share')
+          m('button.btn', { onclick: (e) => { e.preventDefault(); downloadImg(mdl) } }, 'Share')
         )
       )
   }
@@ -78,6 +78,7 @@ const Help = () => {
 
 const Grid = () => {
   return {
+    oncreate: ({ dom, attrs: { mdl } }) => mdl.state.dom = dom,
     onupdate: ({ attrs: { mdl } }) => {
       if (mdl.state.status() == 'SELECT_SQR') {
         mdl.originals = JSON.stringify(mdl.blocks.map(({ id, coords }) => ({ id, coords })))

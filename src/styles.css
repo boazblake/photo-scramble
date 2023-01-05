@@ -82,7 +82,7 @@ fieldset {
 
 .block {
   border-radius:var(--borderRadius);
-  transition: transform 3s ease;
+  transition: opacity, transform 3s ease;
   will-change: transform;
 }
 
