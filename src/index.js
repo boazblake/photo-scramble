@@ -1,6 +1,6 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle, getToggleStyle, downloadImg } from './model'
+import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle, getToggleStyle } from './model'
 import { setupResponsiveness, } from './utils'
 import logo from './images/photo-scramble-logo.png'
 import loader from './images/logo-loader.gif'
@@ -24,16 +24,13 @@ const Block = () => {
       const origBlock = mdl.blocks.find(b => b.id == block.id)
       const coords = dom.getBoundingClientRect()
       block.coords = coords
-      // console.log('create', block.id, block.coords)
       origBlock.coords = coords
       block.dom = dom
       origBlock.dom = dom
       setBackground(mdl, block, dom)
-      m.redraw()
     },
-    view: ({ attrs: { mdl, block } }) => {
-      // console.log('view', block.id, block.coords)
-      return m('.block', {
+    view: ({ attrs: { mdl, block } }) =>
+      m('.block', {
         ['data-coords']: JSON.stringify(block.coords),
         id: block.id,
         disabled: mdl.state.status() == 'COMPLETED',
@@ -43,7 +40,6 @@ const Block = () => {
         style: { border: getBorder(mdl, block) },
       },
       )
-    }
   }
 }
 

@@ -107,16 +107,13 @@ const getNeighbourIds = (id, target) => {
 const splitImage = (mdl, image) => {
   const width = image.width;
   const height = image.height;
-  // console.log(mdl)
   const chunkWidth = Math.ceil(width / 16);
-  // console.log(width, chunkWidth)
   const chunks = []
   for (let x = 0; x < width; x += chunkWidth) {
     const chunkCanvas = document.createElement('canvas');
     const chunkContext = chunkCanvas.getContext('2d');
     chunkCanvas.width = chunkWidth;
     chunkCanvas.height = height;
-    //top left x top left y, 100, 100, 0,0, 100,100
     chunkContext.drawImage(image, x, 0, chunkWidth, height, 0, 0, chunkWidth, height);
     chunkContext.clip()
     chunks.push(chunkCanvas.toDataURL());
@@ -336,44 +333,44 @@ const getToggleStyle = isDisabled => ({
   cursor: isDisabled ? 'not-allowed' : 'pointer'
 })
 
-const downloadImg = mdl => {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  const image = new Image();
-  const width = 400
-  const height = 400
-  image.src = mdl.img.src();
+// const downloadImg = mdl => {
+//   const canvas = document.createElement('canvas');
+//   const ctx = canvas.getContext('2d');
+//   const image = new Image();
+//   const width = 400
+//   const height = 400
+//   image.src = mdl.img.src();
 
-  console.log(mdl.img.coords)
-  let doms = Array.from(mdl.state.dom.children)
-  let coords = doms.map(d => d.style.backgroundPosition).map(c => c.split('px')).map(([x, y]) => ({ x, y }))
-  console.log(coords)
-  // console.log(coords)
-  image.onload = () => {
-    coords.forEach(({ x, y }) => {
-      // Calculate the source and destination coordinates for the image
-      const sx = mdl.img.coords.left - x;
-      const sy = mdl.img.coords.top - y;
-      const dx = sx//(index % 4) * coords.width;
-      const dy = sy//Math.floor(index / 4) * coords.height;
+//   console.log(mdl.img.coords)
+//   let doms = Array.from(mdl.state.dom.children)
+//   let coords = doms.map(d => d.style.backgroundPosition).map(c => c.split('px')).map(([x, y]) => ({ x, y }))
+//   console.log(coords)
+//   // console.log(coords)
+//   image.onload = () => {
+//     coords.forEach(({ x, y }) => {
+//       // Calculate the source and destination coordinates for the image
+//       const sx = mdl.img.coords.left - x;
+//       const sy = mdl.img.coords.top - y;
+//       const dx = sx//(index % 4) * coords.width;
+//       const dy = sy//Math.floor(index / 4) * coords.height;
 
-      // Draw the image onto the canvas
-      ctx.drawImage(image, sx, sy, height, width, dx, dy, width, height);
-      // const { x, y } = { x: mdl.img.coords.left - coords.left, y: mdl.img.coords.top - coords.top }
-      // console.log(x, y)
+//       // Draw the image onto the canvas
+//       ctx.drawImage(image, sx, sy, height, width, dx, dy, width, height);
+//       // const { x, y } = { x: mdl.img.coords.left - coords.left, y: mdl.img.coords.top - coords.top }
+//       // console.log(x, y)
 
-      // Create a download link and trigger a download
-    })
-    const dataURL = canvas.toDataURL();
+//       // Create a download link and trigger a download
+//     })
+//     const dataURL = canvas.toDataURL();
 
-    // const link = document.createElement('a');
-    // link.href = dataURL
-    // link.download = 'image.png';
-    // link.click();
-  }
+//     // const link = document.createElement('a');
+//     // link.href = dataURL
+//     // link.download = 'image.png';
+//     // link.click();
+//   }
 
 
 
-}
+// }
 
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle, getImgStyle, getToggleStyle, downloadImg }
+export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle, getImgStyle, getToggleStyle, }
