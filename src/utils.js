@@ -6,6 +6,8 @@ window.log = m => v => {
   return v
 }
 
+const clamp = (value, min, max) => Math.max(min, Math.min(value, max))
+
 
 const getScreenOrientation = (mdl) => {
   let winW = window.innerWidth
@@ -79,5 +81,5 @@ const fireworks = () => {
 
 
 export {
-  getRandom, distanceBetweenElements, uuid, fireworks, setupResponsiveness
+  getRandom, distanceBetweenElements, uuid, fireworks, setupResponsiveness, clamp
 }

@@ -201,18 +201,6 @@ input:checked + .slider:before {
   top: -40%;
 }
 
-@keyframes logoAnim {
-	0% {
-		transform: scale(10);
-    opacity: 0;
-	}
-
-	100% {
-		transform: scale(1);
-    opacity: 1;
-	}
-}
-
 #input-anim {
   animation: fadeIn 1s ease-out 2s forwards;
   opacity:0;
@@ -220,7 +208,6 @@ input:checked + .slider:before {
   top: 50dvh;
   justify-self:center;
 }
-
 
 #image-viewer {
   animation: fadeIn 1s ease-out .2s 1 normal forwards;
@@ -245,7 +232,19 @@ input:checked + .slider:before {
   animation: fadeIn 1s ease-out 2s forwards;
 }
 
-@keyframes logoStill {
+@-webkit-keyframes logoAnim {
+	0% {
+		transform: scale(10);
+    opacity: 0;
+	}
+
+	100% {
+		transform: scale(1);
+    opacity: 1;
+	}
+}
+
+@-webkit-keyframes logoStill {
 	0% {
 		opacity: 0;
     width: 25px;
@@ -257,7 +256,7 @@ input:checked + .slider:before {
 	}
 }
 
-@keyframes fadeIn {
+@-webkit-keyframes fadeIn {
 	0% {
 		opacity: 0;
 	}
@@ -265,4 +264,9 @@ input:checked + .slider:before {
 	100% {
 		opacity: 1;
 	}
+}
+
+@-webkit-keyframes slide {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }

@@ -1,6 +1,6 @@
 import m from 'mithril'
 import Stream from 'mithril-stream'
-import { getRandom, distanceBetweenElements, uuid, fireworks } from './utils.js'
+import { getRandom, distanceBetweenElements, uuid, fireworks, clamp } from './utils.js'
 
 // const SCREEN_SIZES = ['PHONE', 'TABLET', 'DESKTOP']
 // const STATUS = ['READY', 'COMPLETED', 'SELECT_IMG', 'SELECT_SQR', 'SELECT_LEVEL', 'SHUFFLING']
@@ -61,7 +61,6 @@ const newModel = () => ({
 })
 
 const DISTANCE_BETWEEN_CELLS = [100, 101]
-
 
 const newGame = mdl => {
   mdl.blocks = []
@@ -160,7 +159,6 @@ const calcStepsLeft = mdl => {
   const original = JSON.parse(mdl.originals).map((b) => JSON.stringify(b.coords))
   const current = mdl.blocks.map((b) => JSON.stringify(b.coords))
   return original.map((original, idx) => original == current[idx])
-    // .map(log('wtf'))
     .reduce((total, next) =>
       next ? total : total + 1, 0)
 }
@@ -185,18 +183,6 @@ const selectHiddenBlock = (mdl, id, isUser) => ({ target }) => {
   return mdl
 }
 
-const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
-const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
-const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
-const isLastHistoryBlock = (mdl, block) => mdl.swap.history.slice(-2)[0] == block.id
-
-const isDraggable = (mdl, block) => {
-  if (mdl.swap.isDragging) {
-    return isHiddenBlock(mdl, block)
-  } else {
-    return isSwapBlock(mdl, block) || isHiddenBlock(mdl, block)
-  }
-}
 const moveBlock = (mdl, block, isUser) => {
   if (!mdl.swap.swapBlockIds.includes(block.id)) return
   mdl.state.showHint() && mdl.state.hintUsed(mdl.state.hintUsed() + 1)
@@ -211,7 +197,7 @@ const moveBlock = (mdl, block, isUser) => {
   const tempCoords = target.coords
   target.coords = block.coords
   setBackground(mdl, block, targetDom)
-  mdl.swap.dragging = false
+  mdl.swap.isDragging = false
   block.coords = tempCoords
   selectHiddenBlock(mdl, block.id, isUser)({ target: block.dom })
 }
@@ -265,28 +251,39 @@ const calculateMovesLeft = mdl => {
   }
 }
 
-const getBorder = (mdl, block) =>
+const blockBorder = (mdl, block) =>
   mdl.state.status() == 'SELECT_SQR' || (isSwapBlock(mdl, block) && mdl.state.status() !== 'COMPLETED')
     ? isLastHistoryBlock(mdl, block) && mdl.state.showHint()
       ? '3px solid var(--hint)'
       : '3px solid var(--hilight)'
     : ''
 
-const getBlockClass = (mdl, block) => isHiddenBlock(mdl, block)
+const blockClassList = (mdl, block) => isHiddenBlock(mdl, block)
   ? 'isSwapBlock'
   : isSwapBlock(mdl, block)
     ? 'point isSwapBlock'
     : mdl.state.status() == 'SELECT_SQR' ? 'point' : ''
 
-const getAction = (mdl, block) => mdl.state.hiddenBlock()
+const blockAction = (mdl, block) => mdl.state.hiddenBlock()
   ? () => moveBlock(mdl, block, true)
   : mdl.state.level() && mdl.state.status() !== 'COMPLETED' && selectHiddenBlockAndShuffle(mdl, block, 0)
 
+const isSwapBlock = (mdl, block) => mdl.swap.swapBlockIds.includes(block.id)
+const isHiddenBlock = (mdl, block) => block.id == mdl.state.hiddenBlock()
+const isHistoryBlock = (mdl, block) => mdl.swap.history.includes(block.id)
+const isLastHistoryBlock = (mdl, block) => mdl.swap.history.slice(-2)[0] == block.id
 
-const getAppClass = mdl =>
+const isDraggable = (mdl, block) => {
+  if (mdl.swap.isDragging) {
+    return isHiddenBlock(mdl, block)
+  } else {
+    return isSwapBlock(mdl, block) || isHiddenBlock(mdl, block)
+  }
+}
+
+const appClassList = mdl =>
   mdl.img.src() && mdl.state.screenSize() == 'TABLET' ? 'row' : 'col'
 
-const getAppStyle = mdl => mdl.img.src() && mdl.state.screenSize() == 'TABLET' && { justifyContent: 'space-between' }
 
 const headerHeight = (size, hasImage) => {
   switch (size) {
@@ -306,71 +303,36 @@ const justifyHeader = (mdl) => {
 }
 
 
+const appStyle = mdl =>
+  mdl.img.src() && mdl.state.screenSize() == 'TABLET' &&
+  { justifyContent: 'space-between' }
 
-const getHeaderStyle = mdl => ({
+const headerStyle = mdl => ({
   height: headerHeight(mdl.state.screenSize(), mdl.img.src()),
   justifyContent: justifyHeader(mdl)
 
 })
 
-const getTitleStyle = mdl => ({
+const titleStyle = mdl => ({
   left: mdl.state.screenSize() == 'TABLET' && mdl.img.src() ? 0 : 'inherit',
   fontSize: '3rem'
 })
 
-const getInputAnimStyle = mdl => ({
+const inputStyle = mdl => ({
   justifyContent: mdl.state.screenSize() == 'TABLET' && !mdl.img.src() ? 'center' : 'flex-start'
 })
 
-const getImgStyle = mdl => ({
+const imgStyle = mdl => ({
   width: 'var(--size)',
   height: 'var(--size)',
   zIndex: mdl.img.display() ? 1000 : 0,
   opacity: () => mdl.img.display() ? 1 : 0.2
 })
 
-const getToggleStyle = isDisabled => ({
+const toggleStyle = isDisabled => ({
   cursor: isDisabled ? 'not-allowed' : 'pointer'
 })
 
-// const downloadImg = mdl => {
-//   const canvas = document.createElement('canvas');
-//   const ctx = canvas.getContext('2d');
-//   const image = new Image();
-//   const width = 400
-//   const height = 400
-//   image.src = mdl.img.src();
-
-//   console.log(mdl.img.coords)
-//   let doms = Array.from(mdl.state.dom.children)
-//   let coords = doms.map(d => d.style.backgroundPosition).map(c => c.split('px')).map(([x, y]) => ({ x, y }))
-//   console.log(coords)
-//   // console.log(coords)
-//   image.onload = () => {
-//     coords.forEach(({ x, y }) => {
-//       // Calculate the source and destination coordinates for the image
-//       const sx = mdl.img.coords.left - x;
-//       const sy = mdl.img.coords.top - y;
-//       const dx = sx//(index % 4) * coords.width;
-//       const dy = sy//Math.floor(index / 4) * coords.height;
-
-//       // Draw the image onto the canvas
-//       ctx.drawImage(image, sx, sy, height, width, dx, dy, width, height);
-//       // const { x, y } = { x: mdl.img.coords.left - coords.left, y: mdl.img.coords.top - coords.top }
-//       // console.log(x, y)
-
-//       // Create a download link and trigger a download
-//     })
-//     const dataURL = canvas.toDataURL();
-
-//     // const link = document.createElement('a');
-//     // link.href = dataURL
-//     // link.download = 'image.png';
-//     // link.click();
-//   }
-
-
-
-// }
-
-export { newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, getBorder, getBlockClass, getAction, getAppClass, getAppStyle, getTitleStyle, getHeaderStyle, getInputAnimStyle, getImgStyle, getToggleStyle, }
+export {
+  newModel, upload, newGame, splitImage, isSwapBlock, isHiddenBlock, isDraggable, moveBlock, setBackground, selectHiddenBlockAndShuffle, selectLevel, calculateMovesTaken, isHistoryBlock, restart, calcStepsLeft, calculateMovesLeft, isLastHistoryBlock, blockBorder, blockClassList, blockAction, appClassList, appStyle, titleStyle, headerStyle, inputStyle, imgStyle, toggleStyle,
+}

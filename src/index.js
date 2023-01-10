@@ -1,6 +1,8 @@
 import m from 'mithril'
 import './styles.css'
-import { newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, getBorder, getAppClass, getAppStyle, getBlockClass, getAction, getTitleStyle, getHeaderStyle, getInputAnimStyle, getToggleStyle } from './model'
+import {
+  newModel, upload, newGame, splitImage, isDraggable, setBackground, selectLevel, restart, blockBorder, appClassList, appStyle, blockClassList, blockAction, titleStyle, headerStyle, inputStyle, toggleStyle,
+} from './model'
 import { setupResponsiveness, } from './utils'
 import logo from './images/photo-scramble-logo.png'
 import loader from './images/logo-loader.gif'
@@ -34,40 +36,11 @@ const Block = () => {
         ['data-coords']: JSON.stringify(block.coords),
         id: block.id,
         disabled: mdl.state.status() == 'COMPLETED',
-        class: getBlockClass(mdl, block),
-        onclick: getAction(mdl, block),
+        class: blockClassList(mdl, block),
+        onclick: blockAction(mdl, block),
         draggable: isDraggable(mdl, block),
-        style: { border: getBorder(mdl, block) },
+        style: { border: blockBorder(mdl, block) },
       },
-      )
-  }
-}
-
-
-const Toggle = {
-  view: ({ attrs: { mdl, label, id, action, isDisabled } }) => m("label.row", { style: { width: '100%', justifyContent: 'space-between', lineHeight: '3rem' } },
-    m('code', label),
-    m('label.switchContainer',
-      m(`input.switch#${id}`, {
-        disabled: isDisabled(mdl),
-        type: 'checkbox',
-        onchange: () => action(mdl)
-      }),
-      m(".slider.round", { style: getToggleStyle(isDisabled(mdl)) }),
-    ))
-}
-
-const Help = () => {
-  return {
-    oncreate: ({ attrs: { mdl }, dom }) => mdl.state.help = dom,
-    view: ({ attrs: { mdl } }) =>
-      m('dialog#dialog',
-        { onclick: (e) => { e.target.id == 'dialog' && mdl.state.help.close() }, open: false },
-        m('form.col',
-          mdl.help.toggles.map(({ label, id, action, isDisabled }) =>
-            m(Toggle, { mdl, label, id, action, isDisabled })),
-          // m('button.btn', { onclick: (e) => { e.preventDefault(); downloadImg(mdl) } }, 'Share')
-        )
       )
   }
 }
@@ -136,8 +109,8 @@ const ImageSelector = {
 
 const Header = {
   view: ({ attrs: { mdl } }) =>
-    m('section#header.col', { style: getHeaderStyle(mdl) },
-      m('code#title.text.row', { style: getTitleStyle(mdl) }, 'PHOTO', m('img#logo-still', { src: logo, }),
+    m('section#header.col', { style: headerStyle(mdl) },
+      m('code#title.text.row', { style: titleStyle(mdl) }, 'PHOTO', m('img#logo-still', { src: logo, }),
         'SCRAMBLE!'),
       mdl.img.src() && m('.row',
         mdl.state.status() == 'SELECT_LEVEL' && m(LevelSelector, { mdl }),
@@ -152,14 +125,41 @@ const Header = {
     )
 }
 
+const Toggle = {
+  view: ({ attrs: { mdl, label, id, action, isDisabled } }) => m("label.row", { style: { width: '100%', justifyContent: 'space-between', lineHeight: '3rem' } },
+    m('code', label),
+    m('label.switchContainer',
+      m(`input.switch#${id}`, {
+        disabled: isDisabled(mdl),
+        type: 'checkbox',
+        onchange: () => action(mdl)
+      }),
+      m(".slider.round", { style: toggleStyle(isDisabled(mdl)) }),
+    ))
+}
+
+const Help = () => {
+  return {
+    oncreate: ({ attrs: { mdl }, dom }) => mdl.state.help = dom,
+    view: ({ attrs: { mdl } }) =>
+      m('dialog#dialog',
+        { onclick: (e) => { e.target.id == 'dialog' && mdl.state.help.close() }, open: false },
+        m('form.col',
+          mdl.help.toggles.map(({ label, id, action, isDisabled }) =>
+            m(Toggle, { mdl, label, id, action, isDisabled })),
+          // m('button.btn', { onclick: (e) => { e.preventDefault(); downloadImg(mdl) } }, 'Share')
+        )
+      )
+  }
+}
 
 const App = mdl => {
   setupResponsiveness(mdl)
   return {
     view: () =>
       m('#app', {
-        style: getAppStyle(mdl),
-        class: getAppClass(mdl)
+        style: appStyle(mdl),
+        class: appClassList(mdl)
       },
         m(Header, { mdl }),
         mdl.img.src()
@@ -167,7 +167,7 @@ const App = mdl => {
             m('#viewer.row',
               mdl.state.status() !== 'COMPLETED' && m(Grid, { mdl }), m(Img, { mdl })),
             mdl.state.screenSize() !== 'TABLET' && m(Toolbar, { mdl }))
-          : m('section.col', { style: getInputAnimStyle(mdl) },
+          : m('section.col', { style: inputStyle(mdl) },
             m('#logo-anim', m('img', { src: loader, })),
             m('#input-anim', m(ImageSelector, { mdl }))
           ),
